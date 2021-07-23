@@ -5,7 +5,7 @@ PROG= a.out
 CC= gcc
 GCCFLAGS =      -g
 CFLAGS =        -g
-WARNFLAGS = -Wall -ansi -std=gnu99
+WARNFLAGS = -Wall -ansi -std=gnu11
 WARN_ADDITIONAL = -Wshadow
 
 HFILES= glFunctions/display.h glFunctions/keyboard.h glFunctions/init.h
