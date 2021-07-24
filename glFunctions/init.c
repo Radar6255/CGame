@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
+
+#include <cglm/cglm.h>
 
 #define VERT_SHADER_LOC "glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "glFunctions/shaderCode/fragShader.glsl"
@@ -11,6 +14,21 @@ struct ShaderCode{
     const GLchar ** code;
     GLint* codeLength;
 };
+
+// Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
+// Naming convention MP(Main Program), underscores for space and all caps
+enum mainProgram{
+    MP_PROJ_MAT,
+    MP_NUM_UNIFORMS
+};
+
+const char* MAIN_PROGRAM_UNIFORMS[] = {
+    "projMat"
+};
+
+GLuint mainProgram;
+GLuint* mainProgramUniforms;
+
 
 // Loads in the shader code from a file.
 // Returns a pointer to a const char*, both of which should be freed
@@ -103,7 +121,21 @@ GLuint initProgram(){
     return program;
 }
 
-void initGL(){
+GLuint* getUniformLocations(GLuint program, const char** uniformNames){
+    GLuint* out = (GLuint*) malloc(MP_NUM_UNIFORMS * sizeof(GLuint));
+    glGetUniformIndices(program, MP_NUM_UNIFORMS, uniformNames, out);
+    return out;
+}
+
+void setUpCamera(int windowWidth, int windowHeight, GLuint program){
+    glUseProgram(program);
+
+    mat4 projMat;
+    glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
+    glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
+}
+
+void initGL(int windowWidth, int windowHeight){
     glClearColor(0, 0, 0, 1);
 
     glEnable(GL_DEPTH_TEST);
@@ -112,7 +144,14 @@ void initGL(){
 
     // Loads the shaders to the graphics card
     // TODO set this function active at some point
-    initProgram();
+    mainProgram = initProgram();
+    mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
+    setUpCamera(windowWidth, windowHeight, mainProgram);
 
     //TODO Set up texture here
+}
+
+void freeGLResources(){
+    // Free anything that was created in initialization
+    free(mainProgramUniforms);
 }

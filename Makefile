@@ -26,10 +26,10 @@ SUFFIXES: .C .o
 	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.cpp
 
 .c.o:
-	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -lGL -lGLU -lglut -lGLEW
+	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -lGL -lGLU -lglut -lGLEW -lm
 
 $(PROG): $(OFILES)  
-	$(CC) -o $(PROG) $(OFILES) -lGL -lGLU -lglut -lGLEW
+	$(CC) -o $(PROG) $(OFILES) -lGL -lGLU -lglut -lGLEW -lm
 
 clean:
 	rm -f $(OFILES) $(PROG) 

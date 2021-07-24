@@ -24,7 +24,7 @@ void display(void){
     timespec_get(&start, TIME_UTC);
     if(!init){
         printf("Running OpenGL initialization\n");
-        initGL();
+        initGL(windowWidth, windowHeight);
         init = 1;
     }
     // TODO Update any rendering that needs to be done
