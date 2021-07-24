@@ -8,7 +8,7 @@ CFLAGS =        -g
 WARNFLAGS = -Wall -ansi -std=gnu11
 WARN_ADDITIONAL = -Wshadow
 
-HFILES= glFunctions/display.h glFunctions/keyboard.h glFunctions/init.h
+HFILES= glFunctions/display.h glFunctions/keyboard.h glFunctions/init.h engine/eventHandler.h
 CFILES= main.c glFunctions/display.c glFunctions/keyboard.c glFunctions/init.c
 CPPFILES=
 
