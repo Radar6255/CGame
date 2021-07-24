@@ -5,7 +5,7 @@
 //      *function (void*) - Function to call for the event
 //      void* arguments - The arguments to pass to the function call
 struct Event{
-    void* function (void*);
+    void (*function) (void* arg);
     void* arguments;
 };
 

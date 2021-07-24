@@ -15,6 +15,8 @@ void reshape(int w, int h){
     windowWidth = w;
     windowHeight = h;
     glViewport(0, 0, windowWidth, windowHeight);
+    // TODO Find if this needs to have a mutex because threading
+    setProjMat(w, h);
 }
 
 // Believe this is the main draw call
@@ -29,7 +31,7 @@ void display(void){
     }
     // TODO Update any rendering that needs to be done
 
-
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, windowWidth, windowHeight);
 
@@ -37,6 +39,7 @@ void display(void){
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame
     struct timespec end;
     timespec_get(&end, TIME_UTC);

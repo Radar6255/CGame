@@ -16,18 +16,6 @@ pthread_mutex_t eventLock;
 
 pthread_t mainEventThread;
 
-// Initializes the event handler
-int initEventHandler(){
-    // Create the queue to add elements to later
-    eventQueue = createQueue();
-    if(!pthread_mutex_init(&eventLock, NULL)){
-        printf("Couldn't initialize the mutex for the event handler.\n");
-        return 200;
-    }
-
-    pthread_create(&mainEventThread, NULL, eventHandlerLoop, NULL);
-}
-
 // Frees all memory that the event handler uses and stops the event handler
 int stopEventHandler(){
     running = 0;
@@ -81,4 +69,17 @@ void eventHandlerLoop(){
         end.tv_nsec = (long)  (1000000000 / TICKS_PER_SECOND) - (end.tv_nsec - start.tv_nsec);
         nanosleep(&end, &end);
     }
+}
+
+// Initializes the event handler
+int initEventHandler(){
+    // Create the queue to add elements to later
+    eventQueue = createQueue();
+    if(!pthread_mutex_init(&eventLock, NULL)){
+        printf("Couldn't initialize the mutex for the event handler.\n");
+        return 200;
+    }
+
+    pthread_create(&mainEventThread, NULL, eventHandlerLoop, NULL);
+    return 0;
 }

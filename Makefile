@@ -1,5 +1,5 @@
-# Here is the simple default Makefile that I use whenever makemake is run 
-# without any Makefile in the current directory.
+# Found from https://stackoverflow.com/questions/2483182/recursive-wildcards-in-gnu-make
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 PROG= a.out
 CC= gcc
@@ -8,8 +8,8 @@ CFLAGS =        -g
 WARNFLAGS = -Wall -ansi -std=gnu11
 WARN_ADDITIONAL = -Wshadow
 
-HFILES= glFunctions/display.h glFunctions/keyboard.h glFunctions/init.h engine/eventHandler.h
-CFILES= main.c glFunctions/display.c glFunctions/keyboard.c glFunctions/init.c
+HFILES= $(call rwildcard,.,*h)
+CFILES= $(call rwildcard,.,*c)
 CPPFILES=
 
 SOURCEFILES= $(CPPFILES) $(HFILES)	
@@ -26,10 +26,10 @@ SUFFIXES: .C .o
 	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.cpp
 
 .c.o:
-	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -lGL -lGLU -lglut -lGLEW -lm
+	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -pthread -lGL -lGLU -lglut -lGLEW -lm
 
 $(PROG): $(OFILES)  
-	$(CC) -o $(PROG) $(OFILES) -lGL -lGLU -lglut -lGLEW -lm
+	$(CC) -o $(PROG) $(OFILES) -pthread -lGL -lGLU -lglut -lGLEW -lm
 
 clean:
 	rm -f $(OFILES) $(PROG) 

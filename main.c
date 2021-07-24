@@ -6,6 +6,7 @@
 
 #include "glFunctions/display.h"
 #include "glFunctions/keyboard.h"
+#include "glFunctions/init.h"
 
 void printErr(char* errMsg){
     fprintf(stderr, errMsg);
@@ -16,7 +17,7 @@ void printErr(char* errMsg){
 int main(int argc, char** argv){
     glutInit(&argc, argv);
 
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(758, 568);
 
     glutInitWindowPosition(100, 100);
@@ -32,10 +33,10 @@ int main(int argc, char** argv){
     }
     printf("Successfully initialized GLEW.\n");
 
-    // Do init here
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+    atexit(freeGLResources);
 
     // Starts the main program
     glutMainLoop();

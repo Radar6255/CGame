@@ -7,6 +7,8 @@
 
 #include <cglm/cglm.h>
 
+#include "init.h"
+
 #define VERT_SHADER_LOC "glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "glFunctions/shaderCode/fragShader.glsl"
 
@@ -19,16 +21,22 @@ struct ShaderCode{
 // Naming convention MP(Main Program), underscores for space and all caps
 enum mainProgram{
     MP_PROJ_MAT,
+    MP_VIEW_MAT,
     MP_NUM_UNIFORMS
 };
 
 const char* MAIN_PROGRAM_UNIFORMS[] = {
-    "projMat"
+    "projMat",
+    "viewMat"
 };
 
 GLuint mainProgram;
 GLuint* mainProgramUniforms;
 
+// Starting camera attributes
+vec3 startCameraPos = {0, 0, 0};
+vec3 startCameraDirection = {1.5, 0, 0};
+vec3 cameraUp = {0, 1, 0};
 
 // Loads in the shader code from a file.
 // Returns a pointer to a const char*, both of which should be freed
@@ -127,8 +135,19 @@ GLuint* getUniformLocations(GLuint program, const char** uniformNames){
     return out;
 }
 
-void setUpCamera(int windowWidth, int windowHeight, GLuint program){
-    glUseProgram(program);
+void setUpCamera(int windowWidth, int windowHeight){
+    setProjMat(windowWidth, windowHeight);
+
+    glUseProgram(mainProgram);
+    mat4 viewMat;
+    glm_lookat(startCameraPos, startCameraDirection, cameraUp, viewMat);
+    glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
+}
+
+// Sets up the projection matrix for the graphics calculations
+// Needs to be called on every window update due to it needing the aspect ratio
+void setProjMat(int windowWidth, int windowHeight){
+    glUseProgram(mainProgram);
 
     mat4 projMat;
     glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
@@ -136,22 +155,26 @@ void setUpCamera(int windowWidth, int windowHeight, GLuint program){
 }
 
 void initGL(int windowWidth, int windowHeight){
-    glClearColor(0, 0, 0, 1);
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0);
 
     // Loads the shaders to the graphics card
-    // TODO set this function active at some point
     mainProgram = initProgram();
     mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
-    setUpCamera(windowWidth, windowHeight, mainProgram);
+    setUpCamera(windowWidth, windowHeight);
 
     //TODO Set up texture here
 }
 
+void bindVAO(){
+    
+}
+
 void freeGLResources(){
+    printf("Closing program...\n");
+
     // Free anything that was created in initialization
     free(mainProgramUniforms);
+    printf("Closed!\n");
 }
