@@ -12,6 +12,15 @@ static float points[][3] = {
     {-0.5f, 0.5f, 0.0f}
 };
 
+static float texCoords[][2] = {
+    {0, 0},
+    {1, 0},
+    {0, 1},
+    {1, 0},
+    {1, 1},
+    {0, 1}
+};
+
 renderData initRect(){
     renderData rectData;
     rectData.points = points;

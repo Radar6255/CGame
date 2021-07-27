@@ -4,9 +4,9 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
-#include "glFunctions/display.h"
-#include "glFunctions/keyboard.h"
-#include "glFunctions/init.h"
+#include "glFunctions/headers/display.h"
+#include "glFunctions/headers/keyboard.h"
+#include "glFunctions/headers/init.h"
 
 void printErr(char* errMsg){
     fprintf(stderr, errMsg);

@@ -7,7 +7,7 @@
 
 #include <cglm/cglm.h>
 
-#include "init.h"
+#include "headers/init.h"
 
 #define VERT_SHADER_LOC "glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "glFunctions/shaderCode/fragShader.glsl"

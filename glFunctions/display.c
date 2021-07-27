@@ -1,4 +1,4 @@
-#include "init.h"
+#include "headers/init.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -19,7 +19,6 @@ void reshape(int w, int h){
     setProjMat(w, h);
 }
 
-// Believe this is the main draw call
 void display(void){
     // Getting the time we entered into the function
     struct timespec start;
