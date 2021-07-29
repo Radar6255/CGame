@@ -8,6 +8,7 @@
 #include <cglm/cglm.h>
 
 #include "headers/init.h"
+#include "headers/textureLoading.h"
 
 #define VERT_SHADER_LOC "glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "glFunctions/shaderCode/fragShader.glsl"
@@ -32,6 +33,7 @@ const char* MAIN_PROGRAM_UNIFORMS[] = {
 
 GLuint mainProgram;
 GLuint* mainProgramUniforms;
+GLuint* textures;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
@@ -164,7 +166,7 @@ void initGL(int windowWidth, int windowHeight){
     mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
     setUpCamera(windowWidth, windowHeight);
 
-    //TODO Set up texture here
+    textures = initializeTextures();
 }
 
 void bindVAO(){
