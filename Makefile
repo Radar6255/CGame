@@ -8,8 +8,8 @@ CFLAGS =        -g
 WARNFLAGS = -Wall -ansi -std=gnu11
 WARN_ADDITIONAL = -Wshadow
 
-HFILES= $(call rwildcard,.,*h)
-CFILES= $(call rwildcard,.,*c)
+HFILES= $(call rwildcard,game,*h)
+CFILES= $(call rwildcard,game,*c)
 CPPFILES=
 
 SOURCEFILES= $(CPPFILES) $(HFILES)	
@@ -34,3 +34,13 @@ $(PROG): $(OFILES)
 clean:
 	rm -f $(OFILES) $(PROG) 
 
+build: game/glFunctions/headers/texturesList.h
+
+game/glFunctions/headers/texturesList.h: getAssets.out
+	./tools/getAssets.out
+
+getAssets.out: tools/findAssets.o
+	$(CC) -o tools/getAssets.out tools/findAssets.o -lm
+
+%.o : %.c
+	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -lm

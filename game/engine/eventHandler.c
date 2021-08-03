@@ -53,7 +53,7 @@ void runEvents(){
 }
 
 // The main running loop for the event handler
-void eventHandlerLoop(){
+void* eventHandlerLoop(void *unused){
     while(running){
         // Getting the time we started running events
         struct timespec start;
@@ -69,6 +69,8 @@ void eventHandlerLoop(){
         end.tv_nsec = (long)  (1000000000 / TICKS_PER_SECOND) - (end.tv_nsec - start.tv_nsec);
         nanosleep(&end, &end);
     }
+
+    return NULL;
 }
 
 // Initializes the event handler
@@ -80,6 +82,6 @@ int initEventHandler(){
         return 200;
     }
 
-    pthread_create(&mainEventThread, NULL, eventHandlerLoop, NULL);
+    pthread_create(&mainEventThread, NULL, &eventHandlerLoop, NULL);
     return 0;
 }

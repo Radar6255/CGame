@@ -1,3 +1,6 @@
+// This file has all of the code load automatically load all assets from the assets folder.
+// The limit of this is that the max path size can't be more than 255
+
 #include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
@@ -8,10 +11,12 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include "headers/texturesList.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "headers/stb_image.h"
 
-#define IMAGE_ASSET_LOCATION "assets/world/Monolith"
+#define IMAGE_ASSET_LOCATION "assets"
 #define IMAGE_FORMAT_REGEX ".png"
 
 regex_t regex;
@@ -68,56 +73,49 @@ void cutString(char* str, int pos){
 }
 
 // TODO Find a good way to make a good list of all of the image files in the assets folder
-struct dirent **getAllImageFiles(char* directory){
-    struct dirent **out;
+GLuint *getAllImageFiles(char* directory){
+    GLuint* out = (GLuint*) malloc(sizeof(GLuint) * NUM_ASSETS);
+    struct dirent **fileList; 
 
-    int numFiles = scandir(directory, &out, filter, alphasort);
+    int numFiles = scandir(directory, &fileList, filter, alphasort);
 
     for(int i = 2; i < numFiles; i++){
-        if(out[i]->d_type == DT_DIR){
+        if(fileList[i]->d_type == DT_DIR){
             char directoryPath[PATH_MAX];
-            concatString(out[i]->d_name, directoryPath);
+            concatString(fileList[i]->d_name, directoryPath);
             getAllImageFiles(directoryPath);
+        }else{
+            // TODO
+            glGenTextures(1, &(out[i]));
+            glBindTexture(GL_TEXTURE_2D, out[i]);
+
+            // Getting the path to the image file in a string
+            char directoryPath[PATH_MAX];
+            cloneString(directory, directoryPath);
+            concatString(directoryPath, fileList[i]->d_name);
+
+            // Loading the file to put into OpenGL
+            int width, height, nChannels;
+            unsigned char *imageData = stbi_load(directoryPath, &width, &height, &nChannels, 0);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+            stbi_image_free(imageData);
         }
+        free(fileList[i]);
     }
+
+    free(fileList);
+
+    return out;
 }
 
-// TODO Change to load the images in an order or have some way to pull them by name not alphabetically
+// TODO Change to load the images in an order
 GLuint* initializeTextures(){
-    struct dirent **namelist;
-
     // Setting up regex for the filter so I only have to do it once
     if (regcomp(&regex, IMAGE_FORMAT_REGEX, 0)){
         printf("ERROR: Couldn't compile regex for finding image files\n");
         exit(203);
     }
 
-    int numImages = scandir(IMAGE_ASSET_LOCATION, &namelist, filter, alphasort);
-
-    GLuint* out = (GLuint*) malloc(sizeof(GLuint) * numImages);
-
-    char imagePath[PATH_MAX];
-    cloneString(IMAGE_ASSET_LOCATION, imagePath);
-    int dirLength = stringSize(IMAGE_ASSET_LOCATION);
-
-    for(int i = 0; i < numImages; i++){
-        int width, height, nChannels;
-        cutString(imagePath, dirLength);
-        concatString(imagePath, namelist[i]->d_name);
-        unsigned char *imageData = stbi_load(imagePath, &width, &height, &nChannels, 0);
-
-        if(!imageData){
-            printf("Failed to load image '%s'. Continuing if possible...\n", imagePath);
-        }
-
-        glGenTextures(1, &(out[i]));
-        glBindTexture(GL_TEXTURE_2D, out[i]);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
-
-        free(namelist[i]);
-        stbi_image_free(imageData);
-    }
-
-    return out;
+    return getAllImageFiles(IMAGE_ASSET_LOCATION);
 }

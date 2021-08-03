@@ -10,8 +10,8 @@
 #include "headers/init.h"
 #include "headers/textureLoading.h"
 
-#define VERT_SHADER_LOC "glFunctions/shaderCode/vertexShader.glsl"
-#define FRAG_SHADER_LOC "glFunctions/shaderCode/fragShader.glsl"
+#define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
+#define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
 
 struct ShaderCode{
     const GLchar ** code;
@@ -77,6 +77,10 @@ struct ShaderCode getShaderCode(char* filename){
 // vertexShader is a bool that is 1 when the shader is a vertex shader 0 otherwise
 GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexShader){
     GLuint out = glCreateShader(GL_VERTEX_SHADER * vertexShader + GL_FRAGMENT_SHADER * (1 - vertexShader));
+    if(!out){
+        printf("OpenGL failed to create a shader to use.\n");
+        exit(12);
+    }
     glShaderSource(out, 1, shaderCode, shaderLength);
     glCompileShader(out);
 
@@ -97,6 +101,7 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexS
 
     return out;
 }
+
 // Initializes the shaders for the glProgram
 GLuint initProgram(){
     GLuint program = glCreateProgram();

@@ -2,7 +2,7 @@
 #define RENDER_DATA_HEADER
 
 typedef struct renderData_s{
-    float ** points;
+    float * points[3];
 } renderData;
 
 #endif
