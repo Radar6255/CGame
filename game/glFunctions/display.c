@@ -47,6 +47,7 @@ void display(void){
     end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
     nanosleep(&end, &end);
     
+    
 
     // Call for another draw
     glutPostRedisplay();

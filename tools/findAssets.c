@@ -76,6 +76,9 @@ void getAllImageFiles(char* directory, FILE* outFile){
 
     int numFiles = scandir(directory, &fileList, filter, alphasort);
 
+    for(int i = 0; i < numFiles && i < 2; i++){
+        free(fileList[i]);
+    }
     for(int i = 2; i < numFiles; i++){
         if(fileList[i]->d_type != DT_REG){
             char directoryPath[PATH_MAX];
@@ -91,7 +94,10 @@ void getAllImageFiles(char* directory, FILE* outFile){
 
             fprintf(outFile, "  %s,\n", fileList[i]->d_name);
         }
+        free(fileList[i]);
     }
+
+    free(fileList);
 }
 
 int main(void){

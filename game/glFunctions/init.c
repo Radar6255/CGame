@@ -9,6 +9,7 @@
 
 #include "headers/init.h"
 #include "headers/textureLoading.h"
+#include "renderObjects/rectangle.h"
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
@@ -34,6 +35,8 @@ const char* MAIN_PROGRAM_UNIFORMS[] = {
 GLuint mainProgram;
 GLuint* mainProgramUniforms;
 GLuint* textures;
+
+struct renderData *rect;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
@@ -172,6 +175,8 @@ void initGL(int windowWidth, int windowHeight){
     setUpCamera(windowWidth, windowHeight);
 
     textures = initializeTextures();
+
+    rect = initRect();    
 }
 
 void bindVAO(){
@@ -182,6 +187,7 @@ void freeGLResources(){
     printf("Closing program...\n");
 
     // Free anything that was created in initialization
+    free(textures);
     free(mainProgramUniforms);
     printf("Closed!\n");
 }

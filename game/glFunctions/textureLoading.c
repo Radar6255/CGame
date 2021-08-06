@@ -19,7 +19,13 @@
 #define IMAGE_ASSET_LOCATION "assets"
 #define IMAGE_FORMAT_REGEX ".png"
 
+// Used to find if a file has a image extension
+// Used to gather all of the assets
 regex_t regex;
+// Used to keep track of how many images have been loaded so it can insert them into the right place
+int numLoadedImages = 0;
+// Holds the gl texture locations so that they can be referenced other places in the program
+GLuint* glTextureLocations;
 
 int filter(const struct dirent* dir){
     if (!dir){
@@ -72,22 +78,24 @@ void cutString(char* str, int pos){
     str[pos] = 0;
 }
 
-// TODO Find a good way to make a good list of all of the image files in the assets folder
-GLuint *getAllImageFiles(char* directory){
-    GLuint* out = (GLuint*) malloc(sizeof(GLuint) * NUM_ASSETS);
+void getAllImageFiles(char* directory){
     struct dirent **fileList; 
 
     int numFiles = scandir(directory, &fileList, filter, alphasort);
 
+    for(int i = 0; i < numFiles && i < 2; i++){
+        free(fileList[i]);
+    }
     for(int i = 2; i < numFiles; i++){
         if(fileList[i]->d_type == DT_DIR){
             char directoryPath[PATH_MAX];
             concatString(fileList[i]->d_name, directoryPath);
+            // TODO get all of the image files into the output
             getAllImageFiles(directoryPath);
         }else{
-            // TODO
-            glGenTextures(1, &(out[i]));
-            glBindTexture(GL_TEXTURE_2D, out[i]);
+            glGenTextures(1, &(glTextureLocations[numLoadedImages]));
+            glBindTexture(GL_TEXTURE_2D, glTextureLocations[numLoadedImages]);
+            numLoadedImages++;
 
             // Getting the path to the image file in a string
             char directoryPath[PATH_MAX];
@@ -103,10 +111,6 @@ GLuint *getAllImageFiles(char* directory){
         }
         free(fileList[i]);
     }
-
-    free(fileList);
-
-    return out;
 }
 
 // TODO Change to load the images in an order
@@ -117,5 +121,7 @@ GLuint* initializeTextures(){
         exit(203);
     }
 
-    return getAllImageFiles(IMAGE_ASSET_LOCATION);
+    glTextureLocations = (GLuint*) malloc(sizeof(GLuint) * NUM_ASSETS);
+    getAllImageFiles(IMAGE_ASSET_LOCATION);
+    return glTextureLocations;
 }
