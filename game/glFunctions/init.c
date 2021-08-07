@@ -10,6 +10,7 @@
 #include "headers/init.h"
 #include "headers/textureLoading.h"
 #include "renderObjects/rectangle.h"
+#include "renderObjects/renderData.h"
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
@@ -21,20 +22,29 @@ struct ShaderCode{
 
 // Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
 // Naming convention MP(Main Program), underscores for space and all caps
-enum mainProgram{
+enum mainProgramUniforms{
     MP_PROJ_MAT,
     MP_VIEW_MAT,
     MP_NUM_UNIFORMS
 };
 
+// All of the uniforms that are in the main program
+// Used to tell the program where those are
 const char* MAIN_PROGRAM_UNIFORMS[] = {
     "projMat",
     "viewMat"
 };
 
+// Arrays and OpenGL values that get used through out the program
+
+// The main program that does most if not all the rendering
 GLuint mainProgram;
+// An array of openGL program uniform locations
 GLuint* mainProgramUniforms;
+// Array of openGL texture locations
 GLuint* textures;
+// Array of openGL VAO's
+GLuint* vaoArray;
 
 struct renderData *rect;
 
@@ -164,6 +174,29 @@ void setProjMat(int windowWidth, int windowHeight){
     glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
 }
 
+// Binds a VAO object to a program and also binds the buffers
+// TODO Make this also bind the texture coordinates
+void bindVAO(struct renderData* data, GLuint vao, GLuint program){
+    // Binding the vao to operate on
+    glBindVertexArray(vao);
+
+    GLuint *buffers = (GLuint *) malloc(sizeof(GLuint *) * RENDER_DATA_BUFFERS);
+    glCreateBuffers(RENDER_DATA_BUFFERS, buffers);
+
+    // Loading the data into the buffer
+    glNamedBufferData(buffers[0], sizeof(data->points), data->points, GL_STATIC_DRAW);
+
+    // Bind the buffer to the VAO to use as verticies
+    glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(float) * 3);
+    glVertexArrayAttribBinding(vao, 0, 0);
+
+    // Telling OpenGL the format of our buffer
+    glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3);
+
+    // Telling openGL where our vertex input is in the vertex shader and enabling it
+    glEnableVertexArrayAttrib(vao, 0);
+}
+
 void initGL(int windowWidth, int windowHeight){
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -176,17 +209,31 @@ void initGL(int windowWidth, int windowHeight){
 
     textures = initializeTextures();
 
-    rect = initRect();    
+    GLsizei numVAOs = 1;
+    rect = initRect();
+
+    vaoArray = (GLuint *) malloc(sizeof(GLuint*) * numVAOs);
+    // Creating VAOs
+    glCreateVertexArrays(numVAOs, vaoArray);
+
+    // Binding the rectangle VAO to the main program
+    bindVAO(rect, vaoArray[0], mainProgram);
 }
 
-void bindVAO(){
-    
+GLuint getMainProgram(){
+    return mainProgram;
 }
 
+GLuint getVAO(int index){
+    return vaoArray[index];
+}
+
+// TODO Call this if the program was sucessfully initialized otherwise this may crash
 void freeGLResources(){
     printf("Closing program...\n");
 
     // Free anything that was created in initialization
+    free(vaoArray);
     free(textures);
     free(mainProgramUniforms);
     printf("Closed!\n");

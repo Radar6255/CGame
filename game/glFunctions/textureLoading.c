@@ -79,9 +79,13 @@ void cutString(char* str, int pos){
 }
 
 void getAllImageFiles(char* directory){
-    struct dirent **fileList; 
+    struct dirent **fileList;
 
     int numFiles = scandir(directory, &fileList, filter, alphasort);
+
+    if(numFiles < 1){
+        return;
+    }
 
     for(int i = 0; i < numFiles && i < 2; i++){
         free(fileList[i]);
@@ -111,6 +115,8 @@ void getAllImageFiles(char* directory){
         }
         free(fileList[i]);
     }
+
+    free(fileList);
 }
 
 // TODO Change to load the images in an order

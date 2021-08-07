@@ -34,9 +34,9 @@ void display(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, windowWidth, windowHeight);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glUseProgram(getMainProgram());
+    glBindVertexArray(getVAO(0));
+    glDrawArrays(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT);
 
     glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame
@@ -47,8 +47,6 @@ void display(void){
     end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
     nanosleep(&end, &end);
     
-    
-
     // Call for another draw
     glutPostRedisplay();
 }
