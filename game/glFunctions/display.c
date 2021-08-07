@@ -36,7 +36,7 @@ void display(void){
 
     glUseProgram(getMainProgram());
     glBindVertexArray(getVAO(0));
-    glDrawArrays(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT);
+    glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
 
     glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame

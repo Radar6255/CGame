@@ -191,10 +191,14 @@ void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     glVertexArrayAttribBinding(vao, 0, 0);
 
     // Telling OpenGL the format of our buffer
-    glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3);
+    glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayBindingDivisor(vao, 0, 0);
 
     // Telling openGL where our vertex input is in the vertex shader and enabling it
     glEnableVertexArrayAttrib(vao, 0);
+
+    // Freeing the buffers for now it may be wiser to keep this and do glDelete of the buffers later if possible
+    free(buffers);
 }
 
 void initGL(int windowWidth, int windowHeight){
@@ -231,6 +235,8 @@ GLuint getVAO(int index){
 // TODO Call this if the program was sucessfully initialized otherwise this may crash
 void freeGLResources(){
     printf("Closing program...\n");
+    // Freeing openGL stuff
+    glDeleteProgram(mainProgram);
 
     // Free anything that was created in initialization
     free(vaoArray);
