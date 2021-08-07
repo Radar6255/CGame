@@ -93,12 +93,16 @@ void getAllImageFiles(char* directory){
     for(int i = 2; i < numFiles; i++){
         if(fileList[i]->d_type == DT_DIR){
             char directoryPath[PATH_MAX];
-            concatString(fileList[i]->d_name, directoryPath);
-            // TODO get all of the image files into the output
+            cloneString(directory, directoryPath);
+            concatString(directoryPath, fileList[i]->d_name);
             getAllImageFiles(directoryPath);
         }else{
-            glGenTextures(1, &(glTextureLocations[numLoadedImages]));
             glBindTexture(GL_TEXTURE_2D, glTextureLocations[numLoadedImages]);
+            // TODO Set up the texturing parameters a bit more
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             numLoadedImages++;
 
             // Getting the path to the image file in a string
@@ -108,6 +112,7 @@ void getAllImageFiles(char* directory){
 
             // Loading the file to put into OpenGL
             int width, height, nChannels;
+            // TODO Look into how the image data is loaded as I think this is messed up
             unsigned char *imageData = stbi_load(directoryPath, &width, &height, &nChannels, 0);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
@@ -119,8 +124,9 @@ void getAllImageFiles(char* directory){
     free(fileList);
 }
 
-// TODO Change to load the images in an order
 GLuint* initializeTextures(){
+    printf("Loading assets...\n");
+
     // Setting up regex for the filter so I only have to do it once
     if (regcomp(&regex, IMAGE_FORMAT_REGEX, 0)){
         printf("ERROR: Couldn't compile regex for finding image files\n");
@@ -128,6 +134,9 @@ GLuint* initializeTextures(){
     }
 
     glTextureLocations = (GLuint*) malloc(sizeof(GLuint) * NUM_ASSETS);
+    glGenTextures(NUM_ASSETS, glTextureLocations);
+
     getAllImageFiles(IMAGE_ASSET_LOCATION);
+    printf("Finished loading assets...\n");
     return glTextureLocations;
 }

@@ -9,3 +9,4 @@ void setProjMat(int windowWidth, int windowHeight);
 GLuint getVAO(int index);
 // Returns the main program if it has been initialized
 GLuint getMainProgram();
+GLuint uniformPosition(int index);

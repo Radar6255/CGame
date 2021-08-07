@@ -16,7 +16,7 @@ void reshape(int w, int h){
     windowHeight = h;
     glViewport(0, 0, windowWidth, windowHeight);
     // TODO Find if this needs to have a mutex because threading
-    setProjMat(w, h);
+    // setProjMat(w, h);
 }
 
 void display(void){

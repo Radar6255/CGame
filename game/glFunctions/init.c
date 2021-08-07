@@ -9,6 +9,7 @@
 
 #include "headers/init.h"
 #include "headers/textureLoading.h"
+#include "headers/texturesList.h"
 #include "renderObjects/rectangle.h"
 #include "renderObjects/renderData.h"
 
@@ -23,16 +24,14 @@ struct ShaderCode{
 // Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
 // Naming convention MP(Main Program), underscores for space and all caps
 enum mainProgramUniforms{
-    MP_PROJ_MAT,
-    MP_VIEW_MAT,
+    MP_TEMP_TEXTURE,
     MP_NUM_UNIFORMS
 };
 
 // All of the uniforms that are in the main program
 // Used to tell the program where those are
 const char* MAIN_PROGRAM_UNIFORMS[] = {
-    "projMat",
-    "viewMat"
+    "tempTexture"
 };
 
 // Arrays and OpenGL values that get used through out the program
@@ -155,24 +154,24 @@ GLuint* getUniformLocations(GLuint program, const char** uniformNames){
     return out;
 }
 
-void setUpCamera(int windowWidth, int windowHeight){
-    setProjMat(windowWidth, windowHeight);
+// void setUpCamera(int windowWidth, int windowHeight){
+//     setProjMat(windowWidth, windowHeight);
 
-    glUseProgram(mainProgram);
-    mat4 viewMat;
-    glm_lookat(startCameraPos, startCameraDirection, cameraUp, viewMat);
-    glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
-}
+//     glUseProgram(mainProgram);
+//     mat4 viewMat;
+//     glm_lookat(startCameraPos, startCameraDirection, cameraUp, viewMat);
+//     glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
+// }
 
-// Sets up the projection matrix for the graphics calculations
-// Needs to be called on every window update due to it needing the aspect ratio
-void setProjMat(int windowWidth, int windowHeight){
-    glUseProgram(mainProgram);
+// // Sets up the projection matrix for the graphics calculations
+// // Needs to be called on every window update due to it needing the aspect ratio
+// void setProjMat(int windowWidth, int windowHeight){
+//     glUseProgram(mainProgram);
 
-    mat4 projMat;
-    glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
-    glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
-}
+//     mat4 projMat;
+//     glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
+//     glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
+// }
 
 // Binds a VAO object to a program and also binds the buffers
 // TODO Make this also bind the texture coordinates
@@ -194,14 +193,46 @@ void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayBindingDivisor(vao, 0, 0);
 
-    // Telling openGL where our vertex input is in the vertex shader and enabling it
+    // Enabling the vertex attribute in the vertex shader
     glEnableVertexArrayAttrib(vao, 0);
+
+    // Loading the texture coords into a buffer
+    glNamedBufferData(buffers[1], sizeof(data->texCoords), data->texCoords, GL_STATIC_DRAW);
+
+    // Bind the buffer to the VAO to use as texture coords
+    glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
+    glVertexArrayAttribBinding(vao, 1, 0);
+
+    // Telling OpenGL the format of our buffer
+    glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayBindingDivisor(vao, 1, 0);
+
+    // Enabling the texture attribute in the vertex shader
+    glEnableVertexArrayAttrib(vao, 1);
 
     // Freeing the buffers for now it may be wiser to keep this and do glDelete of the buffers later if possible
     free(buffers);
 }
 
+// Taken from https://www.khronos.org/opengl/wiki/OpenGL_Error
+// Handles printing OpenGL errors to make debugging easier
+void GLAPIENTRY
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
 void initGL(int windowWidth, int windowHeight){
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0);
@@ -209,7 +240,7 @@ void initGL(int windowWidth, int windowHeight){
     // Loads the shaders to the graphics card
     mainProgram = initProgram();
     mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
-    setUpCamera(windowWidth, windowHeight);
+    // setUpCamera(windowWidth, windowHeight);
 
     textures = initializeTextures();
 
@@ -222,14 +253,27 @@ void initGL(int windowWidth, int windowHeight){
 
     // Binding the rectangle VAO to the main program
     bindVAO(rect, vaoArray[0], mainProgram);
+
+    // TODO Figure out why the texture isn't showing up
+    glUseProgram(mainProgram);
+    // Temporary texture loading, just for testing need to find a good place for this
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textures[MONO1]);
+    glUniform1i(mainProgramUniforms[MP_TEMP_TEXTURE], 0);
 }
 
+
+// Declaring getters so that we can render things outside of this file
 GLuint getMainProgram(){
     return mainProgram;
 }
 
 GLuint getVAO(int index){
     return vaoArray[index];
+}
+
+GLuint uniformPosition(int index){
+    return mainProgramUniforms[index];
 }
 
 // TODO Call this if the program was sucessfully initialized otherwise this may crash
