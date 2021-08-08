@@ -196,12 +196,13 @@ void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     // Enabling the vertex attribute in the vertex shader
     glEnableVertexArrayAttrib(vao, 0);
 
+
     // Loading the texture coords into a buffer
     glNamedBufferData(buffers[1], sizeof(data->texCoords), data->texCoords, GL_STATIC_DRAW);
 
     // Bind the buffer to the VAO to use as texture coords
     glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
-    glVertexArrayAttribBinding(vao, 1, 0);
+    glVertexArrayAttribBinding(vao, 1, 1);
 
     // Telling OpenGL the format of our buffer
     glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
