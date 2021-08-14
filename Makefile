@@ -30,11 +30,11 @@ clean:
 
 # build: game/glFunctions/headers/texturesList.h
 
-game/glFunctions/headers/texturesList.h: tools/getAssets.out $(IMGFILES)
-	./tools/getAssets.out
+game/glFunctions/headers/texturesList.h: tools/gatherAssets/getAssets.out $(IMGFILES)
+	./tools/gatherAssets/getAssets.out
 
-tools/getAssets.out: tools/findAssets.o
-	$(CC) -o tools/getAssets.out tools/findAssets.o -lm
+tools/gatherAssets/getAssets.out: tools/gatherAssets/findAssets.o
+	$(CC) -o tools/gatherAssets/getAssets.out tools/gatherAssets/findAssets.o -lm
 
 # %.o : %.c
 # 	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -lm

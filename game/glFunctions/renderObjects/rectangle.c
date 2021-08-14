@@ -14,12 +14,12 @@ static float points[6][3] = {
 };
 
 static float texCoords[6][2] = {
-    {0, 0},
-    {1, 0},
+    {1, 1},
     {0, 1},
     {1, 0},
-    {1, 1},
-    {0, 1}
+    {0, 1},
+    {0, 0},
+    {1, 0}
 };
 
 struct renderData *initRect(){

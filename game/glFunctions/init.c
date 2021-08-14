@@ -24,14 +24,14 @@ struct ShaderCode{
 // Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
 // Naming convention MP(Main Program), underscores for space and all caps
 enum mainProgramUniforms{
-    MP_TEMP_TEXTURE,
+    MP_TEX0,
     MP_NUM_UNIFORMS
 };
 
 // All of the uniforms that are in the main program
 // Used to tell the program where those are
 const char* MAIN_PROGRAM_UNIFORMS[] = {
-    "tempTexture"
+    "tex0"
 };
 
 // Arrays and OpenGL values that get used through out the program
@@ -63,8 +63,6 @@ struct ShaderCode getShaderCode(char* filename){
         empty.codeLength = NULL;
         return empty;
     }
-
-    // GLchar* const* out = (GLchar* const*) malloc(sizeof(char *));
 
     // Creating a char* for the size of this file
     fseek(file, 0L, SEEK_END);
@@ -163,8 +161,8 @@ GLuint* getUniformLocations(GLuint program, const char** uniformNames){
 //     glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
 // }
 
-// // Sets up the projection matrix for the graphics calculations
-// // Needs to be called on every window update due to it needing the aspect ratio
+// Sets up the projection matrix for the graphics calculations
+// Needs to be called on every window update due to it needing the aspect ratio
 // void setProjMat(int windowWidth, int windowHeight){
 //     glUseProgram(mainProgram);
 
@@ -226,9 +224,9 @@ MessageCallback( GLenum source,
                  const GLchar* message,
                  const void* userParam )
 {
-  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-            type, severity, message );
+  fprintf( stderr, "----OpenGL %s message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "status" ),
+             message );
 }
 
 void initGL(int windowWidth, int windowHeight){
@@ -255,12 +253,12 @@ void initGL(int windowWidth, int windowHeight){
     // Binding the rectangle VAO to the main program
     bindVAO(rect, vaoArray[0], mainProgram);
 
-    // TODO Figure out why the texture isn't showing up
     glUseProgram(mainProgram);
-    // Temporary texture loading, just for testing need to find a good place for this
+
+    // See if I want to keep texture loading here
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[MONO1]);
-    glUniform1i(mainProgramUniforms[MP_TEMP_TEXTURE], 0);
+    glUniform1i(mainProgramUniforms[MP_TEX0], 0);
 }
 
 
@@ -279,7 +277,7 @@ GLuint uniformPosition(int index){
 
 // TODO Call this if the program was sucessfully initialized otherwise this may crash
 void freeGLResources(){
-    printf("Closing program...\n");
+    printf("\nClosing program...\n");
     // Freeing openGL stuff
     glDeleteProgram(mainProgram);
 
