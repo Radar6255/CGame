@@ -37,15 +37,15 @@ const char* MAIN_PROGRAM_UNIFORMS[] = {
 // Arrays and OpenGL values that get used through out the program
 
 // The main program that does most if not all the rendering
-GLuint mainProgram;
+static GLuint mainProgram = 0;
 // An array of openGL program uniform locations
-GLuint* mainProgramUniforms;
+static GLuint* mainProgramUniforms;
 // Array of openGL texture locations
-GLuint* textures;
+static GLuint* textures;
 // Array of openGL VAO's
-GLuint* vaoArray;
+static GLuint* vaoArray;
 
-struct renderData *rect;
+static struct renderData *rect;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
@@ -113,16 +113,16 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexS
 }
 
 // Initializes the shaders for the glProgram
-GLuint initProgram(){
+GLuint initProgram(char* vertShaderLoc, char* fragShaderLoc){
     GLuint program = glCreateProgram();
 
     printf("\nLoading vertex shader...\n");
-    struct ShaderCode source = getShaderCode(VERT_SHADER_LOC);
+    struct ShaderCode source = getShaderCode(vertShaderLoc);
     GLuint vertShader = createShader(source.code, source.codeLength, 1);
     free(*(GLchar**) source.code);
 
     printf("\nLoading fragment shader...\n");
-    source = getShaderCode(FRAG_SHADER_LOC);
+    source = getShaderCode(fragShaderLoc);
     GLuint fragShader = createShader(source.code, source.codeLength, 0);
     free(*(GLchar**) source.code);
 
@@ -172,7 +172,6 @@ GLuint* getUniformLocations(GLuint program, const char** uniformNames){
 // }
 
 // Binds a VAO object to a program and also binds the buffers
-// TODO Make this also bind the texture coordinates
 void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     // Binding the vao to operate on
     glBindVertexArray(vao);
@@ -229,19 +228,23 @@ MessageCallback( GLenum source,
              message );
 }
 
-void initGL(int windowWidth, int windowHeight){
+// Function to set up some OpenGL constants and set up the debug function for OpenGL
+void initGL(){
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0);
+}
 
+// Loads the main program, its uniforms, and textures
+void loadMainProgram(){
     // Loads the shaders to the graphics card
-    mainProgram = initProgram();
+    mainProgram = initProgram(VERT_SHADER_LOC, FRAG_SHADER_LOC);
     mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
     // setUpCamera(windowWidth, windowHeight);
 
-    textures = initializeTextures();
+    textures = getTextures();
 
     GLsizei numVAOs = 1;
     rect = initRect();
@@ -263,7 +266,14 @@ void initGL(int windowWidth, int windowHeight){
 
 
 // Declaring getters so that we can render things outside of this file
+
+// Gets the main program for the main game
 GLuint getMainProgram(){
+    // If the main program hasn't been made yet initialize it
+    if(!mainProgram){
+        loadMainProgram();
+    }
+
     return mainProgram;
 }
 

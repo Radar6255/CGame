@@ -1,4 +1,5 @@
 #include "headers/init.h"
+#include "../main.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -25,7 +26,22 @@ void display(void){
     timespec_get(&start, TIME_UTC);
     if(!init){
         printf("Running OpenGL initialization\n");
-        initGL(windowWidth, windowHeight);
+
+        // This loads in some constant OpenGL settings for all programs
+        // It also sets up OpenGL debug output
+        initGL();
+
+        // TODO See if needed
+        switch (getMode())
+        {
+        case WBUILDER:
+            
+            // TODO Add another initialization function for world builder
+            break;
+        
+        case GAME:
+            break;
+        }
         init = 1;
     }
     // TODO Update any rendering that needs to be done
@@ -34,9 +50,22 @@ void display(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, windowWidth, windowHeight);
 
-    glUseProgram(getMainProgram());
-    glBindVertexArray(getVAO(0));
-    glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
+    switch (getMode()) {
+    case WBUILDER:
+        // TODO Call the code for the world builder here so that it doesn't need to change anything but main and display
+        break;
+    case GAME:
+        // TODO Throw this in another file that will handle rendering for the game
+        glUseProgram(getMainProgram());
+        glBindVertexArray(getVAO(0));
+        glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
+        break;
+    default:
+        printf("Please specify a valid mode or add a display function to display.c\n");
+        exit(900);
+        break;
+    }
+
 
     glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame

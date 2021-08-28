@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "queue.h"
-#include "eventHandler.h"
+#include "headers/queue.h"
+#include "headers/eventHandler.h"
 
 // How many event ticks per second
 static char TICKS_PER_SECOND = 30;

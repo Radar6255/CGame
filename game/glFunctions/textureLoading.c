@@ -25,7 +25,7 @@ regex_t regex;
 // Used to keep track of how many images have been loaded so it can insert them into the right place
 int numLoadedImages = 0;
 // Holds the gl texture locations so that they can be referenced other places in the program
-GLuint* glTextureLocations;
+GLuint* glTextureLocations = 0;
 
 int filter(const struct dirent* dir){
     if (!dir){
@@ -124,7 +124,7 @@ void getAllImageFiles(char* directory){
     free(fileList);
 }
 
-GLuint* initializeTextures(){
+void initializeTextures(){
     printf("Loading assets...\n");
 
     // Setting up regex for the filter so I only have to do it once
@@ -138,5 +138,15 @@ GLuint* initializeTextures(){
 
     getAllImageFiles(IMAGE_ASSET_LOCATION);
     printf("Finished loading assets...\n");
+}
+
+// Gets the array of textures loaded
+// TODO Consider chucking this in a thread possibly
+GLuint* getTextures(){
+    // If we haven't loaded the textures yet do that
+    if(!glTextureLocations){
+        initializeTextures();
+    }
+
     return glTextureLocations;
 }
