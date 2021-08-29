@@ -7,6 +7,7 @@
 
 #include "glFunctions/headers/display.h"
 #include "glFunctions/headers/keyboard.h"
+#include "glFunctions/headers/mouse.h"
 #include "glFunctions/headers/init.h"
 
 enum RunningModes{
@@ -20,7 +21,7 @@ void printErr(char* errMsg){
 }
 
 // Used to keep what the engine is running at the moment
-enum RunningModes mode = GAME;
+static enum RunningModes mode = GAME;
 
 enum RunningModes getMode(){
     return mode;
@@ -70,6 +71,9 @@ int main(int argc, char** argv){
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouseClick);
+    glutMotionFunc(mouseClickMove);
+    glutPassiveMotionFunc(mouseMove);
     atexit(freeGLResources);
 
     // Starts the main program
