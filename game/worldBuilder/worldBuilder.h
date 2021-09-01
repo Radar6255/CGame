@@ -1,0 +1,1 @@
+void wbMouseHandler(int button, int state, int x, int y);

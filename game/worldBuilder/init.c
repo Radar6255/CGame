@@ -1,8 +1,8 @@
 
-#include "../headers/init.h"
-#include "../renderObjects/rectangle.h"
-#include "../headers/textureLoading.h"
-#include "../headers/texturesList.h"
+#include "../glFunctions/headers/init.h"
+#include "../glFunctions/renderObjects/rectangle.h"
+#include "../glFunctions/headers/textureLoading.h"
+#include "../glFunctions/headers/texturesList.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>

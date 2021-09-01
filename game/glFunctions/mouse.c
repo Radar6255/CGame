@@ -1,4 +1,5 @@
 #include "../main.h"
+#include "../worldBuilder/worldBuilder.h"
 
 #include <stdio.h>
 #include <GL/glew.h>
@@ -9,10 +10,9 @@
 // This takes in the x,y position of the cursor and potentially the button pressed/released and whether it was released or pressed
 // If the mouse state hasn't changed then button and state are INT_MAX to indicate no change
 void mouseHandler(int button, int state, int x, int y){
-    switch (getMode())
-    {
+    switch (getMode()) {
     case WBUILDER:
-        // TODO Implement
+        wbMouseHandler(button, state, x, y);
         break;
     case GAME:
         // TODO Implement
