@@ -16,6 +16,10 @@ struct RenderObject {
     char vaoIndex;
 };
 
+struct RenderArguments {
+    GLuint program;
+    GLuint screenTransUni;
+};
 
 // Initailize everything. Store everything in either an array or a hash set
 // Returns the hash map that will be used to do rendering. Used for the rest of the functions in this file
@@ -60,20 +64,27 @@ char removeRenderObject(void* renderObjects, unsigned int renderObjectId){
 }
 
 // Renders the specified objects from the hash map with the specified program
-void renderFunc(void* renderObject, void* program, GLuint screenTransUni){
+// Render args is a pointer to a render arguments
+void renderFunc(void* renderObject, void* renderArgs){
+    struct RenderArguments* RenderArgumentsS = renderArgs;
     struct RenderObject* renderObjectS = (struct RenderObject*) renderObject;
 
-    glUseProgram(*(GLuint*) program);
+    glUseProgram(RenderArgumentsS->program);
     
-    glUniformMatrix3fv(screenTransUni, 1, GL_FALSE, renderObjectS->screenT);
+    glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
 
     glBindVertexArray(renderObjectS->vaoIndex);
     glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
 }
 
 // Perform a render call
-void renderAllObjects(void* renderObjects, GLuint program){
-    hashMapSetFunc(renderObjects, renderFunc, &program);
+void renderAllObjects(void* renderObjects, GLuint program, GLuint screenTransUni){
+    // Creating an object to store the arguments for the render function
+    struct RenderArguments* args = malloc(sizeof(struct RenderArguments));
+    args->program = program;
+    args->screenTransUni = screenTransUni;
+
+    hashMapSetFunc(renderObjects, renderFunc, &args);
 }
 
 // Translate an object
