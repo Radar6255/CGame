@@ -7,27 +7,28 @@
 #define EXPANDING_FACTOR 2
 #define RESIZE_PERCENT 0.90f
 
-struct hashEntryS{
+typedef struct{
     void *value;
     unsigned int hash;
     char init;
-};
+} hashEntryS;
 
-struct hashMapS{
+typedef struct{
     // The max number of elements that can currently fit in the map
     int size;
     // The number of entries in the map
     int entryCount;
     // The entries in the map
-    struct hashEntryS *entries;
-};
+    hashEntryS *entries;
+} hashMapS;
 
 // Returns a hashMapS*
 void *createHashMap(int size){
-    struct hashMapS *out = (struct hashMapS *) malloc(sizeof(struct hashMapS));
+    hashMapS *out = (hashMapS *) malloc(sizeof(hashMapS));
 
+    out->entryCount = 0;
     out->size = size;
-    out->entries = (struct hashEntryS *) malloc(sizeof(struct hashEntryS) * size);
+    out->entries = (hashEntryS *) malloc(sizeof(hashEntryS) * size);
 
     for(int i = 0; i < size; i++){
         out->entries[i].init = 0;
@@ -41,17 +42,21 @@ void *createHashMap(int size){
 // Value is the pointer to the value you want to add
 // Hash is the hash value of the value is given
 void setHashMapEntry(void* map, void *value, unsigned int hash){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
     mapS->entryCount++;
 
     if(mapS->entryCount >= mapS->size * RESIZE_PERCENT){
+        int oldSize = mapS->size;
         mapS->size = mapS->size * EXPANDING_FACTOR;
         mapS->entries = realloc(mapS->entries, mapS->size * EXPANDING_FACTOR);
+        for(int i = oldSize; i < mapS->size; i++){
+            mapS->entries[i].init = 0;
+        }
     }
 
     int hashOff = hash;
     // Loops until it finds an empty slot to put the entry into or it finds the hash entry
-    while(mapS->entries[hashOff % mapS->size].init == 1) {
+    while(mapS->entries[hashOff % mapS->size].init) {
         // Checking to see if we already have the entry. If we do then break and put the information there
         if (mapS->entries[hashOff % mapS->size].hash == hash) {
             break;
@@ -67,11 +72,11 @@ void setHashMapEntry(void* map, void *value, unsigned int hash){
 // Returns the value that was stored at the hash
 // If it wasn't in the hash map returns a null pointer
 void* removeHashMapEntry(void* map, unsigned int hash){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
     
     int hashOff = hash;
 
-    while(mapS->entries[hashOff % mapS->size].init == 1 && hashOff < mapS->size * 2) {
+    while(mapS->entries[hashOff % mapS->size].init && hashOff < mapS->size * 2) {
         if (mapS->entries[hashOff % mapS->size].hash == hash) {
             mapS->entries[hashOff % mapS->size].init = 0;
             return mapS->entries[hashOff % mapS->size].value;
@@ -85,7 +90,7 @@ void* removeHashMapEntry(void* map, unsigned int hash){
 // Gets the value from a hash map entry
 // If the entry doesn't exist it returns a NULL pointer
 void* getHashMapEntry(void* map, unsigned int hash){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     int hashOff = hash;
     // Loop until you find the correct hash or run into an unitialized entry.
@@ -105,7 +110,7 @@ void* getHashMapEntry(void* map, unsigned int hash){
 
 // Returns a char/boolean of whether the has is in the map or not
 char hashMapContains(void* map, unsigned int hash){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     int hashOff = hash;
     // Loop until you find the correct hash or run into an unitialized entry.
@@ -125,7 +130,7 @@ char hashMapContains(void* map, unsigned int hash){
 // Loops over all of the initailized items in the hash map and performs the function on them
 // The specified function takes in the value as a void* and returns void
 void hashMapSetFunc(void* map, void (*function)(void* value, void* args), void* args){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     for(int hash = 0; hash < mapS->size; hash++){
         if(mapS->entries[hash].init){
@@ -136,7 +141,7 @@ void hashMapSetFunc(void* map, void (*function)(void* value, void* args), void* 
 
 // Frees the hashmap
 void freeHashMap(void* map){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     free(mapS->entries);
     free(mapS);
@@ -144,7 +149,7 @@ void freeHashMap(void* map){
 
 // Frees all hash map entries if the values are safe to free
 void freeHashMapElements(void *map){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     for(int i = 0; i < mapS->size; i++){
         if(mapS->entries[i].init){
@@ -158,7 +163,7 @@ void freeHashMapElements(void *map){
 
 // Returns the number of elements currently in the hash map
 int numHashMapElements(void *map){
-    struct hashMapS* mapS = (struct hashMapS *) map;
+    hashMapS* mapS = (hashMapS *) map;
 
     return mapS->entryCount;
 }

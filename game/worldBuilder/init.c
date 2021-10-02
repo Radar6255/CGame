@@ -3,36 +3,45 @@
 #include "../glFunctions/renderObjects/rectangle.h"
 #include "../glFunctions/headers/textureLoading.h"
 #include "../glFunctions/headers/texturesList.h"
+#include "../engine/headers/render.h"
+#include "init.h"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 
 static GLuint worldBuilderProgram;
 static GLuint* wbProgramUniforms;
 static GLuint* vaoArray;
+static void* renderer = NULL;
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/worldBuilder/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/worldBuilder/fragShader.glsl"
 
-// Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
-// Naming convention MP(Main Program), underscores for space and all caps
-enum worldBuilderProgramUniforms{
-    WBP_TEX0,
-    WBP_NUM_UNIFORMS
-};
-
-// All of the uniforms that are in the main program
+// All of the uniforms that are in the world builder program
 // Used to tell the program where those are
 const char* WORLD_BUILDER_PROGRAM_UNIFORMS[] = {
-    "tex0"
+    "tex0",
+    "screenTransform"
 };
+
+// This function gets the renderer that we will use for the World Builder.
+// The renderer is actually made on the first call but that should only be a little overhead.
+// Potentially move that out at some point
+void* getWBRenderer(){
+    if (!renderer){
+        renderer = intializeRenderer(10);
+    }
+    
+    return renderer;
+}
 
 void loadWBProgram(){
     worldBuilderProgram = initProgram(VERT_SHADER_LOC, FRAG_SHADER_LOC);
 
-    wbProgramUniforms = getUniformLocations(worldBuilderProgram, WORLD_BUILDER_PROGRAM_UNIFORMS);
+    wbProgramUniforms = getUniformLocations(worldBuilderProgram, WBP_NUM_UNIFORMS, WORLD_BUILDER_PROGRAM_UNIFORMS);
 
     // Creating VAOs
     GLsizei numVAOs = 1;
@@ -43,6 +52,7 @@ void loadWBProgram(){
     // Binding the rectangle VAO to the main program
     struct renderData* rect = initRect();
     bindVAO(rect, vaoArray[0], worldBuilderProgram);
+    printf("VAO index init %d.\n", vaoArray[0]);
 
     glUseProgram(worldBuilderProgram);
 
@@ -52,10 +62,16 @@ void loadWBProgram(){
     glUniform1i(wbProgramUniforms[WBP_TEX0], 0);
 }
 
-GLuint getWorldBuilderProgram(){
-    if(!worldBuilderProgram){
-        loadWBProgram();
-    }
+GLuint getWBVAOArray(int index){
+    return vaoArray[index];
+}
 
+// Returns the OpenGL location of the given index of a uniform
+// The meaningful indicies for this array are from the worldBuilderProgramUniforms enum
+GLuint getWBUniformLoc(int index){
+    return wbProgramUniforms[index];
+}
+
+GLuint getWorldBuilderProgram(){
     return worldBuilderProgram;
 }

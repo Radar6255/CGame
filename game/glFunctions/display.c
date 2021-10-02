@@ -2,6 +2,8 @@
 #include "../main.h"
 #include "../worldBuilder/worldBuilder.h"
 #include "../worldBuilder/init.h"
+#include "../engine/headers/render.h"
+#include "../worldBuilder/init.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -38,6 +40,7 @@ void display(void){
         {
         case WBUILDER:
             // TODO Add another initialization function for world builder
+            loadWBProgram();
             break;
         
         case GAME:
@@ -53,13 +56,13 @@ void display(void){
 
     switch (getMode()) {
     case WBUILDER:
-        // TODO Call the code for the world builder here so that it doesn't need to change anything but main and display
-        glUseProgram(getWorldBuilderProgram());
-        // glBindVertexArray(getVAO(0));
-        glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
+        // TODO Consider making the renderer remember all of these arguments
+        // Probably a little bit faster than chucking it on the stack then taking it off again every frame
+        // Doesn't really matter too much though
+        renderAllObjects(getWBRenderer(), getWorldBuilderProgram(), getWBUniformLoc(WBP_WORLD_T));
         break;
     case GAME:
-        // TODO Throw this in another file that will handle rendering for the game
+        // TODO Throw this in another file that will handle rendering for the game  
         glUseProgram(getMainProgram());
         glBindVertexArray(getVAO(0));
         glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);

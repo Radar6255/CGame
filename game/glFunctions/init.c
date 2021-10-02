@@ -146,9 +146,10 @@ GLuint initProgram(char* vertShaderLoc, char* fragShaderLoc){
     return program;
 }
 
-GLuint* getUniformLocations(GLuint program, const char** uniformNames){
-    GLuint* out = (GLuint*) malloc(MP_NUM_UNIFORMS * sizeof(GLuint));
-    glGetUniformIndices(program, MP_NUM_UNIFORMS, uniformNames, out);
+GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames){
+    GLuint* out = (GLuint*) malloc(numUniforms * sizeof(GLuint));
+    glGetUniformIndices(program, numUniforms, uniformNames, out);
+    printf("Initialized uniform 1 as %d\n", out[1]);
     return out;
 }
 
@@ -231,7 +232,7 @@ MessageCallback( GLenum source,
 // Function to set up some OpenGL constants and set up the debug function for OpenGL
 void initGL(){
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
+    glDebugMessageCallback(MessageCallback, NULL);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0);
@@ -241,7 +242,7 @@ void initGL(){
 void loadMainProgram(){
     // Loads the shaders to the graphics card
     mainProgram = initProgram(VERT_SHADER_LOC, FRAG_SHADER_LOC);
-    mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
+    mainProgramUniforms = getUniformLocations(mainProgram, MP_NUM_UNIFORMS, MAIN_PROGRAM_UNIFORMS);
     // setUpCamera(windowWidth, windowHeight);
 
     textures = getTextures();

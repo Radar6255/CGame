@@ -3,10 +3,13 @@
 #include <limits.h>
 #include <stdio.h>
 
+#include "init.h"
+#include "../engine/headers/render.h"
+
 void wbMouseHandler(int button, int state, int x, int y){
     if(button != INT_MAX){
         // Got a click event
-
+        
     }else{
         // Just a mouse movement event
         
@@ -16,6 +19,6 @@ void wbMouseHandler(int button, int state, int x, int y){
 void wbKeyHandler(unsigned char key, int x, int y){
     printf("Pressed: %c\n", key);
     if (key == 'a'){
-        
+        addRenderObject(getWBRenderer(), x, y, getWBVAOArray(0));
     }
 }

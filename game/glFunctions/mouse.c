@@ -26,7 +26,6 @@ void mouseHandler(int button, int state, int x, int y){
 
 // Called when the mouse is clicked on the window
 void mouseClick(int button, int state, int x, int y){
-    printf("Clicked at %d, %d, %d\n", x, y, button);
     mouseHandler(button, state, x, y);
     
 }
