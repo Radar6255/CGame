@@ -4,7 +4,10 @@
 #include <stdio.h>
 
 #include "init.h"
+#include "../glFunctions/headers/display.h"
 #include "../engine/headers/render.h"
+
+
 
 void wbMouseHandler(int button, int state, int x, int y){
     if(button != INT_MAX){
@@ -18,7 +21,10 @@ void wbMouseHandler(int button, int state, int x, int y){
 
 void wbKeyHandler(unsigned char key, int x, int y){
     printf("Pressed: %c\n", key);
+    float relX = ((float) x) / (float) getWindowDims()[0];
+    float relY = ((float) y) / (float) getWindowDims()[1];
+    printf("Divinding %d / %d = %f\n", x, getWindowDims()[0], relX);
     if (key == 'a'){
-        addRenderObject(getWBRenderer(), x, y, getWBVAOArray(0));
+        addRenderObject(getWBRenderer(), relX, relY, getWBVAOArray(0));
     }
 }

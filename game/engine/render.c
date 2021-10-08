@@ -4,10 +4,13 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
+#define CGLM_DEFINE_PRINTS
 #include <cglm/cglm.h>
 
 #include "../errors.h"
 #include "headers/hashMap.h"
+#include "headers/render.h"
+
 
 // Struct to contain an object
 typedef struct {
@@ -36,7 +39,7 @@ void* intializeRenderer(int size){
 
 
 // Add object to render
-int addRenderObject(void* renderObjects, int x, int y, GLuint vaoIndex){
+int addRenderObject(void* renderObjects, float x, float y, GLuint vaoIndex){
     RenderObject* newObject = malloc(sizeof(RenderObject));
 
     // Clearing the screen transform
@@ -48,6 +51,9 @@ int addRenderObject(void* renderObjects, int x, int y, GLuint vaoIndex){
     printf("Add render object vao index %d\n", newObject->vaoIndex);
 
     setHashMapEntry(renderObjects, newObject, newObject->id);
+
+    float pos[] = {x, y};
+    translateObject(renderObjects, newObject->id, pos);
 
     return newObject->id;
 }
@@ -99,6 +105,8 @@ void translateObject(void* renderObjects, unsigned int renderObjectId, float tra
     vec2 off;
     glm_vec2(trans, off);
     glm_translate2d(renderObjectS->screenT, off);
+    glm_mat3_print(renderObjectS->screenT, stderr);
+    fflush(stderr);
 }
 
 // Rotate an object

@@ -1,4 +1,3 @@
-
 #include "../glFunctions/headers/init.h"
 #include "../glFunctions/renderObjects/rectangle.h"
 #include "../glFunctions/headers/textureLoading.h"

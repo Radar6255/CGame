@@ -12,16 +12,23 @@
 #include <GL/glut.h>
 
 char init = 0;
-int windowWidth, windowHeight;
+int *windowDimensions = NULL;
 int maxFramerate = 144;
 
 // Called when the window is reshaped
 void reshape(int w, int h){
-    windowWidth = w;
-    windowHeight = h;
-    glViewport(0, 0, windowWidth, windowHeight);
+    if (!windowDimensions){
+        windowDimensions = malloc(sizeof(int) * 2);
+    }
+    windowDimensions[0] = w;
+    windowDimensions[1] = h;
+    glViewport(0, 0, w, h);
     // TODO Find if this needs to have a mutex because threading
     // setProjMat(w, h);
+}
+
+const int* getWindowDims(){
+    return windowDimensions;
 }
 
 void display(void){
@@ -36,8 +43,7 @@ void display(void){
         initGL();
 
         // TODO See if needed
-        switch (getMode())
-        {
+        switch (getMode()) {
         case WBUILDER:
             // TODO Add another initialization function for world builder
             loadWBProgram();
@@ -52,7 +58,7 @@ void display(void){
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, windowWidth, windowHeight);
+    glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
 
     switch (getMode()) {
     case WBUILDER:
