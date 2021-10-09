@@ -37,6 +37,48 @@ void *createHashMap(int size){
     return out;
 }
 
+void setHashMapEntryArray(hashEntryS *array, int size, void *value, unsigned int hash){
+    int hashOff = hash;
+    // Loops until it finds an empty slot to put the entry into or it finds the hash entry
+    while(array[hashOff % size].init) {
+        // Checking to see if we already have the entry. If we do then break and put the information there
+        if (array[hashOff % size].hash == hash) {
+            break;
+        }
+        hashOff++;
+    }
+    array[hashOff % size].hash = hash;
+    array[hashOff % size].value = value;
+    array[hashOff % size].init = 1;
+}
+
+int resizeHashMap(void* map){
+    hashMapS* mapS = (hashMapS *) map;
+    int oldSize = mapS->size;
+    mapS->size = mapS->size * EXPANDING_FACTOR;
+
+    hashEntryS *new = malloc(sizeof(hashEntryS) * mapS->size);
+    if(!new){
+        printf("Bad malloc!\n");
+        return 200;
+    }
+
+    for(int i = 0; i < mapS->size; i++){
+        new[i].init = 0;
+    }
+
+    for(int i = 0; i < oldSize; i++){
+        if (mapS->entries[i].init){
+            setHashMapEntryArray(new, mapS->size, mapS->entries[i].value, mapS->entries[i].hash);
+        }
+    }
+
+    free(mapS->entries);
+    mapS->entries = new;
+
+    return 0;
+}
+
 // Adds and entry to the HashMap
 // Map is the map to add the value to (hashMapS*)
 // Value is the pointer to the value you want to add
@@ -46,26 +88,15 @@ void setHashMapEntry(void* map, void *value, unsigned int hash){
     mapS->entryCount++;
 
     if(mapS->entryCount >= mapS->size * RESIZE_PERCENT){
-        int oldSize = mapS->size;
-        mapS->size = mapS->size * EXPANDING_FACTOR;
-        mapS->entries = realloc(mapS->entries, mapS->size * EXPANDING_FACTOR);
-        for(int i = oldSize; i < mapS->size; i++){
-            mapS->entries[i].init = 0;
+        printf("Trying to resize the map...\n");
+
+        if (resizeHashMap(map)){
+            printf("Failed to rehash the map!\n");
+            return;
         }
     }
 
-    int hashOff = hash;
-    // Loops until it finds an empty slot to put the entry into or it finds the hash entry
-    while(mapS->entries[hashOff % mapS->size].init) {
-        // Checking to see if we already have the entry. If we do then break and put the information there
-        if (mapS->entries[hashOff % mapS->size].hash == hash) {
-            break;
-        }
-        hashOff++;
-    }
-    mapS->entries[hashOff % mapS->size].hash = hash;
-    mapS->entries[hashOff % mapS->size].value = value;
-    mapS->entries[hashOff % mapS->size].init = 1;
+    setHashMapEntryArray(mapS->entries, mapS->size, value, hash);
 }
 
 // Removes the specified hash entry from the hash map

@@ -45,10 +45,10 @@ int addRenderObject(void* renderObjects, float x, float y, GLuint vaoIndex){
     // Clearing the screen transform
     glm_mat3_identity(newObject->screenT);
 
+    // Just making the hash the next number in the hash
     newObject->id = numHashMapElements(renderObjects);
     
     newObject->vaoIndex = vaoIndex;
-    printf("Add render object vao index %d\n", newObject->vaoIndex);
 
     setHashMapEntry(renderObjects, newObject, newObject->id);
 
@@ -74,12 +74,11 @@ static void renderFunc(void* renderObject, void* renderArgs){
     RenderArguments* RenderArgumentsS = renderArgs;
     RenderObject* renderObjectS = renderObject;
 
-    // printf("Value at 0, 0: %ld.\n", renderObjectS->screenT[0]);
+    if (renderObjectS->vaoIndex > 10){
+        printf("Rending vao: %d\n", renderObjectS->vaoIndex);
+    }
 
-    // printf("%d\n", RenderArgumentsS->screenTransUni);
-    // glUniformMatrix3fv(2, 1, GL_FALSE, renderObjectS->screenT[0]);
     glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
-    // glUniformMatrix3fv(200, 1, GL_FALSE, renderObjectS->screenT[0]);
 
     glBindVertexArray(renderObjectS->vaoIndex);
     glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
@@ -101,10 +100,7 @@ void renderAllObjects(void* renderObjects, GLuint program, GLuint screenTransUni
 void translateObject(void* renderObjects, unsigned int renderObjectId, float trans[2]){
     RenderObject* renderObjectS = getHashMapEntry(renderObjects, renderObjectId);
 
-    // TODO Try using just the vector instead of making a vec2. Not sure if it will work
-    vec2 off;
-    glm_vec2(trans, off);
-    glm_translate2d(renderObjectS->screenT, off);
+    glm_translate2d(renderObjectS->screenT, trans);
     glm_mat3_print(renderObjectS->screenT, stderr);
     fflush(stderr);
 }
@@ -121,7 +117,6 @@ void rotateObject(void* renderObjects, unsigned int renderObjectId, float theta)
 void scaleObject(void* renderObjects, unsigned int renderObjectId, float scale[2]){
     RenderObject* renderObjectS = getHashMapEntry(renderObjects, renderObjectId);
 
-    // TODO Potentially turn scale into vec2
     glm_scale2d(renderObjectS->screenT, scale);
 }
 

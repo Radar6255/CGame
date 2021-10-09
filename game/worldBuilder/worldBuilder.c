@@ -23,7 +23,7 @@ void wbKeyHandler(unsigned char key, int x, int y){
     printf("Pressed: %c\n", key);
     float relX = ((float) x) / (float) getWindowDims()[0];
     float relY = ((float) y) / (float) getWindowDims()[1];
-    printf("Divinding %d / %d = %f\n", x, getWindowDims()[0], relX);
+    
     if (key == 'a'){
         addRenderObject(getWBRenderer(), relX, relY, getWBVAOArray(0));
     }
