@@ -4,7 +4,7 @@
 #include "../renderObjects/renderData.h"
 
 void initGL();
-GLuint initProgram(char* vertShaderLoc, char* fragShaderLoc);
+GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShaderLoc);
 GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames);
 void bindVAO(struct renderData* data, GLuint vao, GLuint program);
 void freeGLResources();

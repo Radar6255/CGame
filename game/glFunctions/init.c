@@ -15,6 +15,7 @@
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
+#define GEO_SHADER_LOC "game/glFunctions/shaderCode/geometryShader.glsl"
 
 struct ShaderCode{
     const GLchar ** code;
@@ -85,8 +86,8 @@ struct ShaderCode getShaderCode(char* filename){
 
 // Shader code is the source code for this shader
 // vertexShader is a bool that is 1 when the shader is a vertex shader 0 otherwise
-GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexShader){
-    GLuint out = glCreateShader(GL_VERTEX_SHADER * vertexShader + GL_FRAGMENT_SHADER * (1 - vertexShader));
+GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, GLenum shaderType){
+    GLuint out = glCreateShader(shaderType);
     if(!out){
         printf("OpenGL failed to create a shader to use.\n");
         exit(12);
@@ -113,20 +114,26 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexS
 }
 
 // Initializes the shaders for the glProgram
-GLuint initProgram(char* vertShaderLoc, char* fragShaderLoc){
+GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShaderLoc){
     GLuint program = glCreateProgram();
 
     printf("\nLoading vertex shader...\n");
     struct ShaderCode source = getShaderCode(vertShaderLoc);
-    GLuint vertShader = createShader(source.code, source.codeLength, 1);
+    GLuint vertShader = createShader(source.code, source.codeLength, GL_VERTEX_SHADER);
+    free(*(GLchar**) source.code);
+
+    printf("\nLoading geometry shader...\n");
+    source = getShaderCode(geometryShaderLoc);
+    GLuint geoShader = createShader(source.code, source.codeLength, GL_GEOMETRY_SHADER);
     free(*(GLchar**) source.code);
 
     printf("\nLoading fragment shader...\n");
     source = getShaderCode(fragShaderLoc);
-    GLuint fragShader = createShader(source.code, source.codeLength, 0);
+    GLuint fragShader = createShader(source.code, source.codeLength, GL_FRAGMENT_SHADER);
     free(*(GLchar**) source.code);
 
     glAttachShader(program, vertShader);
+    glAttachShader(program, geoShader);
     glAttachShader(program, fragShader);
 
     glLinkProgram(program);
@@ -241,7 +248,7 @@ void initGL(){
 // Loads the main program, its uniforms, and textures
 void loadMainProgram(){
     // Loads the shaders to the graphics card
-    mainProgram = initProgram(VERT_SHADER_LOC, FRAG_SHADER_LOC);
+    mainProgram = initProgram(VERT_SHADER_LOC, GEO_SHADER_LOC, FRAG_SHADER_LOC);
     mainProgramUniforms = getUniformLocations(mainProgram, MP_NUM_UNIFORMS, MAIN_PROGRAM_UNIFORMS);
     // setUpCamera(windowWidth, windowHeight);
 

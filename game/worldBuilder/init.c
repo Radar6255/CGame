@@ -17,6 +17,7 @@ static GLuint* vaoArray;
 static void* renderer = NULL;
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/worldBuilder/vertexShader.glsl"
+#define GEO_SHADER_LOC "game/glFunctions/shaderCode/worldBuilder/geometryShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/worldBuilder/fragShader.glsl"
 
 // All of the uniforms that are in the world builder program
@@ -38,7 +39,7 @@ void* getWBRenderer(){
 }
 
 void loadWBProgram(){
-    worldBuilderProgram = initProgram(VERT_SHADER_LOC, FRAG_SHADER_LOC);
+    worldBuilderProgram = initProgram(VERT_SHADER_LOC, GEO_SHADER_LOC, FRAG_SHADER_LOC);
 
     wbProgramUniforms = getUniformLocations(worldBuilderProgram, WBP_NUM_UNIFORMS, WORLD_BUILDER_PROGRAM_UNIFORMS);
 

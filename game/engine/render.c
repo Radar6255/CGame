@@ -74,10 +74,6 @@ static void renderFunc(void* renderObject, void* renderArgs){
     RenderArguments* RenderArgumentsS = renderArgs;
     RenderObject* renderObjectS = renderObject;
 
-    if (renderObjectS->vaoIndex > 10){
-        printf("Rending vao: %d\n", renderObjectS->vaoIndex);
-    }
-
     glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
 
     glBindVertexArray(renderObjectS->vaoIndex);

@@ -88,8 +88,6 @@ void setHashMapEntry(void* map, void *value, unsigned int hash){
     mapS->entryCount++;
 
     if(mapS->entryCount >= mapS->size * RESIZE_PERCENT){
-        printf("Trying to resize the map...\n");
-
         if (resizeHashMap(map)){
             printf("Failed to rehash the map!\n");
             return;
