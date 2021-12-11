@@ -15,6 +15,7 @@
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
+#define GEO_SHADER_LOC "game/glFunctions/shaderCode/geometryShader.glsl"
 
 struct ShaderCode{
     const GLchar ** code;
@@ -37,15 +38,15 @@ const char* MAIN_PROGRAM_UNIFORMS[] = {
 // Arrays and OpenGL values that get used through out the program
 
 // The main program that does most if not all the rendering
-GLuint mainProgram;
+static GLuint mainProgram = 0;
 // An array of openGL program uniform locations
-GLuint* mainProgramUniforms;
+static GLuint* mainProgramUniforms;
 // Array of openGL texture locations
-GLuint* textures;
+static GLuint* textures;
 // Array of openGL VAO's
-GLuint* vaoArray;
+static GLuint* vaoArray;
 
-struct renderData *rect;
+static struct renderData *rect;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
@@ -85,8 +86,8 @@ struct ShaderCode getShaderCode(char* filename){
 
 // Shader code is the source code for this shader
 // vertexShader is a bool that is 1 when the shader is a vertex shader 0 otherwise
-GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexShader){
-    GLuint out = glCreateShader(GL_VERTEX_SHADER * vertexShader + GL_FRAGMENT_SHADER * (1 - vertexShader));
+GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, GLenum shaderType){
+    GLuint out = glCreateShader(shaderType);
     if(!out){
         printf("OpenGL failed to create a shader to use.\n");
         exit(12);
@@ -113,20 +114,26 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, char vertexS
 }
 
 // Initializes the shaders for the glProgram
-GLuint initProgram(){
+GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShaderLoc){
     GLuint program = glCreateProgram();
 
     printf("\nLoading vertex shader...\n");
-    struct ShaderCode source = getShaderCode(VERT_SHADER_LOC);
-    GLuint vertShader = createShader(source.code, source.codeLength, 1);
+    struct ShaderCode source = getShaderCode(vertShaderLoc);
+    GLuint vertShader = createShader(source.code, source.codeLength, GL_VERTEX_SHADER);
+    free(*(GLchar**) source.code);
+
+    printf("\nLoading geometry shader...\n");
+    source = getShaderCode(geometryShaderLoc);
+    GLuint geoShader = createShader(source.code, source.codeLength, GL_GEOMETRY_SHADER);
     free(*(GLchar**) source.code);
 
     printf("\nLoading fragment shader...\n");
-    source = getShaderCode(FRAG_SHADER_LOC);
-    GLuint fragShader = createShader(source.code, source.codeLength, 0);
+    source = getShaderCode(fragShaderLoc);
+    GLuint fragShader = createShader(source.code, source.codeLength, GL_FRAGMENT_SHADER);
     free(*(GLchar**) source.code);
 
     glAttachShader(program, vertShader);
+    glAttachShader(program, geoShader);
     glAttachShader(program, fragShader);
 
     glLinkProgram(program);
@@ -146,9 +153,10 @@ GLuint initProgram(){
     return program;
 }
 
-GLuint* getUniformLocations(GLuint program, const char** uniformNames){
-    GLuint* out = (GLuint*) malloc(MP_NUM_UNIFORMS * sizeof(GLuint));
-    glGetUniformIndices(program, MP_NUM_UNIFORMS, uniformNames, out);
+GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames){
+    GLuint* out = (GLuint*) malloc(numUniforms * sizeof(GLuint));
+    glGetUniformIndices(program, numUniforms, uniformNames, out);
+    printf("Initialized uniform 1 as %d\n", out[1]);
     return out;
 }
 
@@ -172,7 +180,6 @@ GLuint* getUniformLocations(GLuint program, const char** uniformNames){
 // }
 
 // Binds a VAO object to a program and also binds the buffers
-// TODO Make this also bind the texture coordinates
 void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     // Binding the vao to operate on
     glBindVertexArray(vao);
@@ -229,19 +236,23 @@ MessageCallback( GLenum source,
              message );
 }
 
-void initGL(int windowWidth, int windowHeight){
+// Function to set up some OpenGL constants and set up the debug function for OpenGL
+void initGL(){
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
+    glDebugMessageCallback(MessageCallback, NULL);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearDepth(1.0);
+}
 
+// Loads the main program, its uniforms, and textures
+void loadMainProgram(){
     // Loads the shaders to the graphics card
-    mainProgram = initProgram();
-    mainProgramUniforms = getUniformLocations(mainProgram, MAIN_PROGRAM_UNIFORMS);
+    mainProgram = initProgram(VERT_SHADER_LOC, GEO_SHADER_LOC, FRAG_SHADER_LOC);
+    mainProgramUniforms = getUniformLocations(mainProgram, MP_NUM_UNIFORMS, MAIN_PROGRAM_UNIFORMS);
     // setUpCamera(windowWidth, windowHeight);
 
-    textures = initializeTextures();
+    textures = getTextures();
 
     GLsizei numVAOs = 1;
     rect = initRect();
@@ -263,7 +274,14 @@ void initGL(int windowWidth, int windowHeight){
 
 
 // Declaring getters so that we can render things outside of this file
+
+// Gets the main program for the main game
 GLuint getMainProgram(){
+    // If the main program hasn't been made yet initialize it
+    if(!mainProgram){
+        loadMainProgram();
+    }
+
     return mainProgram;
 }
 
