@@ -52,7 +52,6 @@ void loadWBProgram(){
     // Binding the rectangle VAO to the main program
     struct renderData* rect = initRect();
     bindVAO(rect, vaoArray[0], worldBuilderProgram);
-    printf("VAO index init %d.\n", vaoArray[0]);
 
     glUseProgram(worldBuilderProgram);
 
