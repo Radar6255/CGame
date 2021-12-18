@@ -32,6 +32,7 @@ const char* WORLD_BUILDER_PROGRAM_UNIFORMS[] = {
 // Potentially move that out at some point
 void* getWBRenderer(){
     if (!renderer){
+        printf("Initializing renderer...\n");
         renderer = intializeRenderer(10);
     }
     

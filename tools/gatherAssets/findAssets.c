@@ -7,7 +7,7 @@
 #include <regex.h>
 
 #define IMAGE_ASSET_LOCATION "assets"
-#define IMAGE_FORMAT_REGEX ".png"
+#define IMAGE_FORMAT_REGEX ".png$"
 #define ASSET_HEADER_LOCATION "game/glFunctions/headers/texturesList.h"
 
 regex_t regex;

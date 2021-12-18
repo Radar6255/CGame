@@ -20,10 +20,10 @@ all: $(PROG)
 SUFFIXES: .C .o 
 
 %.o:%.c $(HFILES)
-	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -pthread -lGL -lGLU -lglut -lGLEW -lm
+	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -pthread -lX11 -lGL -lGLU -lglut -lGLEW -lm
 
 $(PROG): $(OFILES)
-	$(CC) -o $(PROG) $(OFILES) -pthread -lGL -lGLU -lglut -lGLEW -lm
+	$(CC) -o $(PROG) $(OFILES) -pthread -lX11 -lGL -lGLU -lglut -lGLEW -lm
 
 clean:
 	rm -f $(OFILES) $(PROG) 

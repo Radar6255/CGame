@@ -7,9 +7,9 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
 
 char init = 0;
 int *windowDimensions = NULL;
@@ -58,7 +58,7 @@ void display(void){
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
+    // glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
 
     switch (getMode()) {
     case WBUILDER:
@@ -79,8 +79,7 @@ void display(void){
         break;
     }
 
-
-    glutSwapBuffers();
+    // TODO Swap buffers here
     // Find out how long to wait before trying to call for another frame
     struct timespec end;
     timespec_get(&end, TIME_UTC);
@@ -90,5 +89,6 @@ void display(void){
     nanosleep(&end, &end);
     
     // Call for another draw
-    glutPostRedisplay();
+    // TODO Do this another way
+    // display();
 }
