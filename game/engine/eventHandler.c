@@ -77,7 +77,7 @@ void* eventHandlerLoop(void *unused){
 int initEventHandler(){
     // Create the queue to add elements to later
     eventQueue = createQueue();
-    if(!pthread_mutex_init(&eventLock, NULL)){
+    if(pthread_mutex_init(&eventLock, NULL)){
         printf("Couldn't initialize the mutex for the event handler.\n");
         return 200;
     }

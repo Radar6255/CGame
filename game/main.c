@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <GL/glew.h>
 
@@ -34,9 +35,28 @@ enum RunningModes getMode(){
     return mode;
 }
 
+// What the desired max framerate is
+int maxFramerate = 144;
+
 int screenId;
 Window win;
 Display * dis;
+
+pthread_mutex_t resizeMutex;
+int resize = 1;
+
+void doResize(){
+    pthread_mutex_lock(&resizeMutex);
+    resize = 1;
+    pthread_mutex_unlock(&resizeMutex);
+}
+
+int getResize(){
+    pthread_mutex_lock(&resizeMutex);
+    int out = resize;
+    pthread_mutex_unlock(&resizeMutex);
+    return out;
+}
 
 int closeGame(){
     // freeGLResources();
@@ -48,7 +68,61 @@ int closeGame(){
     return 0;
 }
 
+// TODO Make it so resize and reshape events are handled correctly
+void* handleEvents(void* unused){
+    XEvent xev;
+    while(1){
+        XNextEvent(dis, &xev);
+
+        // XEventsQueued(display, QueuedAlready) should return the events that are still waiting to be handled 
+        switch (xev.type) {
+        case Expose:
+            // XGetWindowAttributes(dis, win, gwa);
+            // TODO This needs to be done a different way, since we aren't on a graphics thread anymore
+            // reshape(gwa.width, gwa.height);
+            doResize();
+            break;
+        case KeyPress:
+            printf("KeyPress\n");
+            glXMakeCurrent(dis, None, NULL);
+
+            printf("%d", xev.xkey.keycode);
+            keyboard(xev.xkey.keycode, xev.xkey.x, xev.xkey.y);
+            // TODO Code to close everything, not sure where to put this
+            // glXDestroyContext(dis, glc);
+            // XDestroyWindow(dis, win);
+            // XCloseDisplay(dis);
+            // return 0;
+            break;
+        // https://tronche.com/gui/x/xlib/events/types.html
+
+        case ResizeRequest:
+            // Getting and setting the new window size
+            // XGetWindowAttributes(dis, win, gwa);
+            // reshape(gwa.width, gwa.height);
+            doResize();
+            break;
+
+        default:
+            break;
+        }
+    }
+    return NULL;
+}
+
 int main(int argc, char** argv){
+    if (XInitThreads()){
+        printf("Successfully initialized X11 threads...\n");
+    }else{
+        printf("Unable to initialize X11 threads, exiting...\n");
+        return 105;
+    }
+
+    if(pthread_mutex_init(&resizeMutex, NULL)){
+        printf("Couldn't initialize the mutex for the resize mutex.\n");
+        return 203;
+    }
+
     GLint att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
 
     if (argc > 1){
@@ -134,33 +208,44 @@ int main(int argc, char** argv){
     }
     printf("Successfully initialized GLEW.\n");
 
-    XSelectInput(dis, win, ExposureMask|ButtonPressMask|KeyPressMask);
+    XSelectInput(dis, win, ExposureMask|ButtonPressMask|KeyPressMask|KeyReleaseMask|FocusChangeMask|ResizeRedirectMask|PointerMotionMask);
 
-    XEvent xev;
     XWindowAttributes gwa;
+
+    pthread_t inputThread;
+
+    // Setting up input on a different thread
+    pthread_create(&inputThread, NULL, &handleEvents, NULL);
+
     while(1){
-        XNextEvent(dis, &xev);
+        // Getting the start time of this frame used to set the max framerate properly
+        struct timespec start;
+        timespec_get(&start, TIME_UTC);
 
-        if(xev.type == Expose){
-            printf("Expose\n");
+        if(getResize()){
             XGetWindowAttributes(dis, win, &gwa);
-            glViewport(0, 0, gwa.width, gwa.height);
-
-            display();
-            glXSwapBuffers(dis, win);
-            // Initialization here?
-        }else if(xev.type == KeyPress){
-            printf("KeyPress\n");
-            glXMakeCurrent(dis, None, NULL);
-            // glXDestroyContext(dis, glc);
-            // XDestroyWindow(dis, win);
-            // XCloseDisplay(dis);
-            // return 0;
-        }else if(xev.type == GraphicsExpose){
-            printf("GraphicsExpose\n");
+            reshape(gwa.width, gwa.height);
         }
+
+        // Creating a new frame to display
+        display();
+        // Switch the frames and display the new one
+        glXSwapBuffers(dis, win);
+
+        // Find out how long to wait before trying to call for another frame
+        struct timespec end;
+        timespec_get(&end, TIME_UTC);
+
+        end.tv_sec = 0;
+        end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
+        nanosleep(&end, &end);
     }
 
+	// Cleanup GLX
+	glXDestroyContext(dis, glc);
+
+    XFree(vi);
+    XFreeColormap(dis, gwa.colormap);
     // TODO Figure out how to do clean up
     closeGame();
 

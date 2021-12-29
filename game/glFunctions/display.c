@@ -13,7 +13,6 @@
 
 char init = 0;
 int *windowDimensions = NULL;
-int maxFramerate = 144;
 
 // Called when the window is reshaped
 void reshape(int w, int h){
@@ -31,11 +30,8 @@ const int* getWindowDims(){
     return windowDimensions;
 }
 
-void display(void){
-    // Getting the time we entered into the function
-    struct timespec start;
-    timespec_get(&start, TIME_UTC);
-    if(!init){
+void display(){
+    if (!init){
         printf("Running OpenGL initialization\n");
 
         // This loads in some constant OpenGL settings for all programs
@@ -54,6 +50,7 @@ void display(void){
         }
         init = 1;
     }
+
     // TODO Update any rendering that needs to be done
 
     glClearColor(0, 0, 0, 1);
@@ -78,17 +75,4 @@ void display(void){
         exit(900);
         break;
     }
-
-    // TODO Swap buffers here
-    // Find out how long to wait before trying to call for another frame
-    struct timespec end;
-    timespec_get(&end, TIME_UTC);
-
-    end.tv_sec = 0;
-    end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
-    nanosleep(&end, &end);
-    
-    // Call for another draw
-    // TODO Do this another way
-    // display();
 }

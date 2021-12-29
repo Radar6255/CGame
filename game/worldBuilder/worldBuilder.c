@@ -18,13 +18,13 @@ void wbMouseHandler(int button, int state, int x, int y){
     }
 }
 
-void wbKeyHandler(unsigned char key, int x, int y){
-    printf("Pressed: %c\n", key);
+void wbKeyHandler(unsigned int key, int x, int y){
+    printf("Pressed: %d\n", key);
     // The y axis is flipped because y increases as you go down
     float relX = 2 * x / (float) getWindowDims()[0] - 1;
     float relY = -2 * y / (float) getWindowDims()[1] + 1;
 
-    if (key == 'a'){
+    if (key == 38){
         time_t start = time(NULL);
         addRenderObject(getWBRenderer(), relX, relY, getWBVAOArray(0));
 

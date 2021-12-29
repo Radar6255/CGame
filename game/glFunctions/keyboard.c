@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 // Keyboard handler
-void keyboard(unsigned char key, int x, int y){
+void keyboard(unsigned int key, int x, int y){
     printf("Keyboard handling...\n");
     wbKeyHandler(key, x, y);
 }
