@@ -36,7 +36,7 @@ enum RunningModes getMode(){
 }
 
 // What the desired max framerate is
-int maxFramerate = 144;
+double maxFramerate = 1000000000 / 144;
 
 int screenId;
 Window win;
@@ -54,6 +54,7 @@ void doResize(){
 int getResize(){
     pthread_mutex_lock(&resizeMutex);
     int out = resize;
+    resize = 0;
     pthread_mutex_unlock(&resizeMutex);
     return out;
 }
@@ -68,7 +69,6 @@ int closeGame(){
     return 0;
 }
 
-// TODO Make it so resize and reshape events are handled correctly
 void* handleEvents(void* unused){
     XEvent xev;
     while(1){
@@ -77,9 +77,6 @@ void* handleEvents(void* unused){
         // XEventsQueued(display, QueuedAlready) should return the events that are still waiting to be handled 
         switch (xev.type) {
         case Expose:
-            // XGetWindowAttributes(dis, win, gwa);
-            // TODO This needs to be done a different way, since we aren't on a graphics thread anymore
-            // reshape(gwa.width, gwa.height);
             doResize();
             break;
         case KeyPress:
@@ -97,9 +94,6 @@ void* handleEvents(void* unused){
         // https://tronche.com/gui/x/xlib/events/types.html
 
         case ResizeRequest:
-            // Getting and setting the new window size
-            // XGetWindowAttributes(dis, win, gwa);
-            // reshape(gwa.width, gwa.height);
             doResize();
             break;
 
@@ -163,9 +157,6 @@ int main(int argc, char** argv){
     swa.colormap = cmap;
     swa.event_mask = ExposureMask | KeyPressMask;
 
-    // long white = WhitePixel(dis, screen);
-    // long black = BlackPixel(dis, screen);
-
     win = XCreateWindow(dis, root, 0, 0,	
 		758, 568, 0, vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
 
@@ -218,10 +209,10 @@ int main(int argc, char** argv){
     pthread_create(&inputThread, NULL, &handleEvents, NULL);
 
     while(1){
-        // Getting the start time of this frame used to set the max framerate properly
-        struct timespec start;
-        timespec_get(&start, TIME_UTC);
 
+        // Getting the start time of this frame used to set the max framerate properly
+        // struct timespec start;
+        // timespec_get(&start, TIME_UTC);
         if(getResize()){
             XGetWindowAttributes(dis, win, &gwa);
             reshape(gwa.width, gwa.height);
@@ -229,16 +220,29 @@ int main(int argc, char** argv){
 
         // Creating a new frame to display
         display();
+
+        // Find out how long to wait before trying to call for another frame
+        // struct timespec end;
+        // timespec_get(&end, TIME_UTC);
+
+        // end.tv_sec = 0;
+        // end.tv_nsec = (long) (maxFramerate - (end.tv_nsec - start.tv_nsec));
+        
+        
+        // struct timespec start1;
+        // timespec_get(&start1, TIME_UTC);
+        // We don't time this
         // Switch the frames and display the new one
         glXSwapBuffers(dis, win);
 
-        // Find out how long to wait before trying to call for another frame
-        struct timespec end;
-        timespec_get(&end, TIME_UTC);
+        // struct timespec end1;
+        // timespec_get(&end1, TIME_UTC);
+        // printf("Swap buffer time: %ld, %ld\n", end1.tv_sec - start1.tv_sec, end1.tv_nsec - start1.tv_nsec);
 
-        end.tv_sec = 0;
-        end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
-        nanosleep(&end, &end);
+        // if(end.tv_nsec < 0){
+        //     printf("Falling behind %ld...\n", end.tv_nsec);
+        // }
+        // nanosleep(&end, &end);
     }
 
 	// Cleanup GLX

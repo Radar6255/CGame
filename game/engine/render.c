@@ -70,11 +70,11 @@ char removeRenderObject(void* renderObjects, unsigned int renderObjectId){
 
 // Renders the specified objects from the hash map with the specified program
 // Render args is a pointer to a render arguments
-static void renderFunc(void* renderObject, void* renderArgs){
-    RenderArguments* RenderArgumentsS = renderArgs;
+static void renderFunc(void* renderObject, void* screenTransArg){
+    GLuint* screenTrans = screenTransArg;
     RenderObject* renderObjectS = renderObject;
 
-    glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
+    glUniformMatrix3fv(*screenTrans, 1, GL_FALSE, renderObjectS->screenT[0]);
 
     glBindVertexArray(renderObjectS->vaoIndex);
     glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
@@ -83,13 +83,13 @@ static void renderFunc(void* renderObject, void* renderArgs){
 // Perform a render call
 void renderAllObjects(void* renderObjects, GLuint program, GLuint screenTransUni){
     // Creating an object to store the arguments for the render function
-    RenderArguments* args = malloc(sizeof(RenderArguments));
-    args->screenTransUni = screenTransUni;
+    // RenderArguments* args = malloc(sizeof(RenderArguments));
+    // args->screenTransUni = screenTransUni;
 
     glUseProgram(program);
 
-    hashMapSetFunc(renderObjects, renderFunc, args);
-    free(args);
+    hashMapSetFunc(renderObjects, renderFunc, &screenTransUni);
+    // free(args);
 }
 
 // Translate an object
