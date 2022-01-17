@@ -33,8 +33,8 @@ const int* getWindowDims(){
 
 void display(void){
     // Getting the time we entered into the function
-    struct timespec start;
-    timespec_get(&start, TIME_UTC);
+    // struct timespec start;
+    // timespec_get(&start, TIME_UTC);
     if(!init){
         printf("Running OpenGL initialization\n");
 
@@ -82,12 +82,12 @@ void display(void){
 
     glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame
-    struct timespec end;
-    timespec_get(&end, TIME_UTC);
+    // struct timespec end;
+    // timespec_get(&end, TIME_UTC);
 
-    end.tv_sec = 0;
-    end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
-    nanosleep(&end, &end);
+    // end.tv_sec = 0;
+    // end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
+    // nanosleep(&end, &end);
     
     // Call for another draw
     glutPostRedisplay();
