@@ -42,20 +42,20 @@ int screenId;
 Window win;
 Display * dis;
 
-pthread_mutex_t resizeMutex;
-int resize = 1;
+// This needs to be atomic since it is accessed from the event thread and the main render thread
+volatile _Atomic int resize = 1;
+volatile _Atomic int windowWidth;
+volatile _Atomic int windowHeight;
 
-void doResize(){
-    pthread_mutex_lock(&resizeMutex);
+void doResize(int w, int h){
+    windowWidth = w;
+    windowHeight = h;
     resize = 1;
-    pthread_mutex_unlock(&resizeMutex);
 }
 
 int getResize(){
-    pthread_mutex_lock(&resizeMutex);
     int out = resize;
     resize = 0;
-    pthread_mutex_unlock(&resizeMutex);
     return out;
 }
 
@@ -77,13 +77,12 @@ void* handleEvents(void* unused){
         // XEventsQueued(display, QueuedAlready) should return the events that are still waiting to be handled 
         switch (xev.type) {
         case Expose:
-            doResize();
+            // doResize();
             break;
         case KeyPress:
             printf("KeyPress\n");
             glXMakeCurrent(dis, None, NULL);
 
-            printf("%d", xev.xkey.keycode);
             keyboard(xev.xkey.keycode, xev.xkey.x, xev.xkey.y);
             // TODO Code to close everything, not sure where to put this
             // glXDestroyContext(dis, glc);
@@ -94,7 +93,8 @@ void* handleEvents(void* unused){
         // https://tronche.com/gui/x/xlib/events/types.html
 
         case ResizeRequest:
-            doResize();
+            // printf("Resized to %d, %d\n", xev.xresizerequest.width, xev.xresizerequest.height);
+            doResize(xev.xresizerequest.width, xev.xresizerequest.height);
             break;
 
         default:
@@ -110,11 +110,6 @@ int main(int argc, char** argv){
     }else{
         printf("Unable to initialize X11 threads, exiting...\n");
         return 105;
-    }
-
-    if(pthread_mutex_init(&resizeMutex, NULL)){
-        printf("Couldn't initialize the mutex for the resize mutex.\n");
-        return 203;
     }
 
     GLint att[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
@@ -209,13 +204,16 @@ int main(int argc, char** argv){
     pthread_create(&inputThread, NULL, &handleEvents, NULL);
 
     while(1){
-
         // Getting the start time of this frame used to set the max framerate properly
         // struct timespec start;
         // timespec_get(&start, TIME_UTC);
         if(getResize()){
-            XGetWindowAttributes(dis, win, &gwa);
-            reshape(gwa.width, gwa.height);
+            // XGetWindowAttributes(dis, win, &gwa);
+            // printf("Got %d, return from getting window attributes\n", );
+            // reshape(gwa.width, gwa.height);
+            if(windowWidth != 0 && windowHeight != 0)
+                XResizeWindow(dis, win, windowWidth, windowHeight);
+            reshape(windowWidth, windowHeight);
         }
 
         // Creating a new frame to display

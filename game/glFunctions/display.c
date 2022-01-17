@@ -22,6 +22,7 @@ void reshape(int w, int h){
     windowDimensions[0] = w;
     windowDimensions[1] = h;
     glViewport(0, 0, w, h);
+    printf("Got a resize of %d, %d\n", w, h);
     // TODO Find if this needs to have a mutex because threading
     // setProjMat(w, h);
 }
