@@ -6,7 +6,7 @@
 void initGL();
 GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShaderLoc);
 GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames);
-void bindVAO(struct renderData* data, GLuint vao, GLuint program);
+void bindVAO(struct renderObject* data, GLuint vao, GLuint program);
 void freeGLResources();
 // Sets up the projection matrix for the graphics calculations
 // Needs to be called on every window update due to it needing the aspect ratio

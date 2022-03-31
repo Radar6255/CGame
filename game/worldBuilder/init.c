@@ -51,7 +51,7 @@ void loadWBProgram(){
 
     // Binding the rectangle VAO to the main program
     struct renderData* rect = initRect();
-    bindVAO(rect, vaoArray[0], worldBuilderProgram);
+    //bindVAO(rect, vaoArray[0], worldBuilderProgram);
 
     glUseProgram(worldBuilderProgram);
 

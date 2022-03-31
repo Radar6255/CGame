@@ -8,4 +8,11 @@ struct renderData{
     float texCoords[6][2];
 };
 
+struct renderObject{
+    float* verticies;
+    float* normals;
+    float* texCoords;
+    unsigned int numVerts;
+};
+
 #endif

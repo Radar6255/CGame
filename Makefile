@@ -22,8 +22,8 @@ SUFFIXES: .C .o
 %.o:%.c $(HFILES)
 	$(CC) -o $*.o -c $(GCCFLAGS) $(WARNFLAGS) $*.c -pthread -lGL -lGLU -lglut -lGLEW -lm
 
-$(PROG): $(OFILES)
-	$(CC) -o $(PROG) $(OFILES) -pthread -lGL -lGLU -lglut -lGLEW -lm
+$(PROG): $(OFILES) lib_parser.a
+	$(CC) -o $(PROG) $(OFILES) -pthread -lGL -lGLU -lglut -lGLEW -lm -L. -l_parser
 
 clean:
 	rm -f $(OFILES) $(PROG) 

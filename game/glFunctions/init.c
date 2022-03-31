@@ -12,6 +12,7 @@
 #include "headers/texturesList.h"
 #include "renderObjects/rectangle.h"
 #include "renderObjects/renderData.h"
+#include "../../header/parser.h"
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
@@ -32,7 +33,7 @@ enum mainProgramUniforms{
 // All of the uniforms that are in the main program
 // Used to tell the program where those are
 const char* MAIN_PROGRAM_UNIFORMS[] = {
-    "tex0"
+    // "tex0"
 };
 
 // Arrays and OpenGL values that get used through out the program
@@ -46,7 +47,7 @@ static GLuint* textures;
 // Array of openGL VAO's
 static GLuint* vaoArray;
 
-static struct renderData *rect;
+//static struct renderData *rect;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
@@ -137,6 +138,11 @@ GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShade
     glAttachShader(program, fragShader);
 
     glLinkProgram(program);
+
+    glDetachShader(program, vertShader);
+    glDetachShader(program, geoShader);
+    glDetachShader(program, fragShader);
+
     GLint params;
     glGetProgramiv(program, GL_LINK_STATUS, &params);
     printf("Program linked: %s\n", params == GL_TRUE ? "Success" : "Failed");
@@ -148,15 +154,23 @@ GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShade
         glGetProgramInfoLog(program, errorSize, NULL, errorLog);
         printf("%s\n", (char *) errorLog);
         free(errorLog);
+        glDeleteProgram(program);
+
+        glDeleteShader(vertShader);
+        glDeleteShader(geoShader);
+        glDeleteShader(fragShader);
     }
 
     return program;
 }
 
 GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames){
+    if (numUniforms){
+
+    }
     GLuint* out = (GLuint*) malloc(numUniforms * sizeof(GLuint));
     glGetUniformIndices(program, numUniforms, uniformNames, out);
-    printf("Initialized uniform 1 as %d\n", out[1]);
+    printf("Initialized uniform 1 as %d\n", out[0]);
     return out;
 }
 
@@ -180,7 +194,7 @@ GLuint* getUniformLocations(GLuint program, int numUniforms, const char** unifor
 // }
 
 // Binds a VAO object to a program and also binds the buffers
-void bindVAO(struct renderData* data, GLuint vao, GLuint program){
+void bindVAO(struct renderObject* data, GLuint vao, GLuint program){
     // Binding the vao to operate on
     glBindVertexArray(vao);
 
@@ -188,9 +202,10 @@ void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     glCreateBuffers(RENDER_DATA_BUFFERS, buffers);
 
     // Loading the data into the buffer
-    glNamedBufferData(buffers[0], sizeof(data->points), data->points, GL_STATIC_DRAW);
+    glNamedBufferData(buffers[0], data->numVerts * sizeof(float), data->verticies, GL_STATIC_DRAW);
 
     // Bind the buffer to the VAO to use as verticies
+    // The sizeof(float) * 3 may change if I decide to use a triangle strip instead of individual triangles
     glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(float) * 3);
     glVertexArrayAttribBinding(vao, 0, 0);
 
@@ -201,20 +216,21 @@ void bindVAO(struct renderData* data, GLuint vao, GLuint program){
     // Enabling the vertex attribute in the vertex shader
     glEnableVertexArrayAttrib(vao, 0);
 
+    if (data->texCoords){
+        // Loading the texture coords into a buffer
+        glNamedBufferData(buffers[1], data->numVerts * sizeof(float) * 2, data->texCoords, GL_STATIC_DRAW);
 
-    // Loading the texture coords into a buffer
-    glNamedBufferData(buffers[1], sizeof(data->texCoords), data->texCoords, GL_STATIC_DRAW);
+        // Bind the buffer to the VAO to use as texture coords
+        glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
+        glVertexArrayAttribBinding(vao, 1, 1);
 
-    // Bind the buffer to the VAO to use as texture coords
-    glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
-    glVertexArrayAttribBinding(vao, 1, 1);
+        // Telling OpenGL the format of our buffer
+        glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayBindingDivisor(vao, 1, 0);
 
-    // Telling OpenGL the format of our buffer
-    glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayBindingDivisor(vao, 1, 0);
-
-    // Enabling the texture attribute in the vertex shader
-    glEnableVertexArrayAttrib(vao, 1);
+        // Enabling the texture attribute in the vertex shader
+        glEnableVertexArrayAttrib(vao, 1);
+    }
 
     // Freeing the buffers for now it may be wiser to keep this and do glDelete of the buffers later if possible
     free(buffers);
@@ -247,29 +263,36 @@ void initGL(){
 
 // Loads the main program, its uniforms, and textures
 void loadMainProgram(){
+    printf("Loading main program\n");
     // Loads the shaders to the graphics card
     mainProgram = initProgram(VERT_SHADER_LOC, GEO_SHADER_LOC, FRAG_SHADER_LOC);
-    mainProgramUniforms = getUniformLocations(mainProgram, MP_NUM_UNIFORMS, MAIN_PROGRAM_UNIFORMS);
+    // mainProgramUniforms = getUniformLocations(mainProgram, MP_NUM_UNIFORMS, MAIN_PROGRAM_UNIFORMS);
     // setUpCamera(windowWidth, windowHeight);
 
     textures = getTextures();
 
     GLsizei numVAOs = 1;
-    rect = initRect();
+    // rect = initRect();
+    // TODO Free the memory from this at some point
+    struct renderObject model;
+    model.verticies = loadModel("cube.obj", &model.numVerts);
+    model.texCoords = NULL;
+    model.normals = NULL;
 
     vaoArray = (GLuint *) malloc(sizeof(GLuint*) * numVAOs);
     // Creating VAOs
     glCreateVertexArrays(numVAOs, vaoArray);
 
     // Binding the rectangle VAO to the main program
-    bindVAO(rect, vaoArray[0], mainProgram);
+    bindVAO(&model, vaoArray[0], mainProgram);
+    printf("Binded VAO\n");
 
     glUseProgram(mainProgram);
 
     // See if I want to keep texture loading here
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[MONO1]);
-    glUniform1i(mainProgramUniforms[MP_TEX0], 0);
+    // glUniform1i(mainProgramUniforms[MP_TEX0], 0);
 }
 
 
