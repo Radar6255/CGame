@@ -1,0 +1,1 @@
+float* loadModel(char* filename, unsigned int* currSize);
