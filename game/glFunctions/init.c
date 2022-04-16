@@ -27,13 +27,17 @@ struct ShaderCode{
 // Naming convention MP(Main Program), underscores for space and all caps
 enum mainProgramUniforms{
     MP_TEX0,
+    MP_VIEW_MAT,
+    MP_PROJ_MAT,
     MP_NUM_UNIFORMS
 };
 
 // All of the uniforms that are in the main program
 // Used to tell the program where those are
 const char* MAIN_PROGRAM_UNIFORMS[] = {
-    // "tex0"
+    "tex0",
+    "cameraPos",
+    "screenTrans"
 };
 
 // Arrays and OpenGL values that get used through out the program
@@ -51,7 +55,7 @@ static GLuint* vaoArray;
 
 // Starting camera attributes
 vec3 startCameraPos = {0, 0, 0};
-vec3 startCameraDirection = {1.5, 0, 0};
+vec3 startCameraDirection = {1, 0, 0};
 vec3 cameraUp = {0, 1, 0};
 
 // Loads in the shader code from a file.
@@ -174,24 +178,23 @@ GLuint* getUniformLocations(GLuint program, int numUniforms, const char** unifor
     return out;
 }
 
-// void setUpCamera(int windowWidth, int windowHeight){
-//     setProjMat(windowWidth, windowHeight);
-
-//     glUseProgram(mainProgram);
-//     mat4 viewMat;
-//     glm_lookat(startCameraPos, startCameraDirection, cameraUp, viewMat);
-//     glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
-// }
+void setCameraPos(vec3 cameraPos, vec3 cameraDir){
+    glUseProgram(mainProgram);
+    mat4 viewMat;
+    glm_look(cameraPos, cameraDir, cameraUp, viewMat);
+    glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
+}
+// Need to make a function to adjust the camera
 
 // Sets up the projection matrix for the graphics calculations
 // Needs to be called on every window update due to it needing the aspect ratio
-// void setProjMat(int windowWidth, int windowHeight){
-//     glUseProgram(mainProgram);
+void setProjMat(int windowWidth, int windowHeight){
+    glUseProgram(mainProgram);
 
-//     mat4 projMat;
-//     glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
-//     glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
-// }
+    mat4 projMat;
+    glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
+    glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
+}
 
 // Binds a VAO object to a program and also binds the buffers
 void bindVAO(struct renderObject* data, GLuint vao, GLuint program){
@@ -286,6 +289,8 @@ void loadMainProgram(){
     // Binding the rectangle VAO to the main program
     bindVAO(&model, vaoArray[0], mainProgram);
     printf("Binded VAO\n");
+
+    setCameraPos(startCameraPos, startCameraDirection);
 
     glUseProgram(mainProgram);
 

@@ -23,8 +23,8 @@ void reshape(int w, int h){
     windowDimensions[0] = w;
     windowDimensions[1] = h;
     glViewport(0, 0, w, h);
-    // TODO Find if this needs to have a mutex because threading
-    // setProjMat(w, h);
+
+    setProjMat(w, h);
 }
 
 const int* getWindowDims(){
@@ -71,6 +71,7 @@ void display(void){
         // TODO Throw this in another file that will handle rendering for the game  
         glUseProgram(getMainProgram());
         glBindVertexArray(getVAO(0));
+        // TODO Need to bind the world and screen transforms here most likely
         glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
         break;
     default:
@@ -78,7 +79,6 @@ void display(void){
         exit(900);
         break;
     }
-
 
     glutSwapBuffers();
     // Find out how long to wait before trying to call for another frame
