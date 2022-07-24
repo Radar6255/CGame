@@ -2,7 +2,6 @@
 #include <stdint.h>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
 
 #define CGLM_DEFINE_PRINTS
 #include <cglm/cglm.h>

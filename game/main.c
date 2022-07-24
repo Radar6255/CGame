@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 
 #include "glFunctions/headers/display.h"
 #include "glFunctions/headers/keyboard.h"
@@ -39,44 +39,65 @@ int main(int argc, char** argv){
             mode = WBUILDER;
         }
     }
-    glutInit(&argc, argv);
+    GLFWwindow* window;
 
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(758, 568);
+    if (!glfwInit()){
+        printErr("Unable to initialize GLFW!\n");
+        return 100;
+    }
 
-    glutInitWindowPosition(100, 100);
-    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    char* title;
     switch (mode) {
     case GAME:
-        glutCreateWindow("A Game in C");
+        title = "A Game in C";
         break;
     case WBUILDER:
-        glutCreateWindow("World Builder Tool");
+        title = "World Builder Tool";
         break;
     default:
-        glutCreateWindow("TODO Create a custom title");
+        title = "TODO Create a custom title";
         break;
     }
-    
+
+    /* glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); */
+    window = glfwCreateWindow(758, 758, title, NULL, NULL);
+    if (!window){
+        glfwTerminate();
+        printErr("Unable to create window!\n");
+        return 100;
+    }
+
+    glfwMakeContextCurrent(window);
+
     printf("Using OpenGL Version: %s\n", glGetString(GL_VERSION));
 
     GLenum glewErr = glewInit();
-    
+
     if(glewErr != GLEW_OK){
         printf("GLEW Error: %s\n", glewGetErrorString(glewErr));
         return 100;
     }
     printf("Successfully initialized GLEW.\n");
 
-    glutReshapeFunc(reshape);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouseClick);
-    glutMotionFunc(mouseClickMove);
-    glutPassiveMotionFunc(mouseMove);
+    glfwSetWindowSizeCallback(window, reshape);
+
+    while(!glfwWindowShouldClose(window)){
+        display(window);
+
+        glfwPollEvents();
+    }
+
+    /* glutKeyboardFunc(keyboard); */
+    /* glutMouseFunc(mouseClick); */
+    /* glutMotionFunc(mouseClickMove); */
+    /* glutPassiveMotionFunc(mouseMove); */
     atexit(freeGLResources);
 
-    // Starts the main program
-    glutMainLoop();
+    glfwDestroyWindow(window);
+    glfwTerminate();
     return 0;
 }

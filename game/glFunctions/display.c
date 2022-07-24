@@ -7,16 +7,16 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <GLFW/glfw3.h>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
 
 char init = 0;
 int *windowDimensions = NULL;
 int maxFramerate = 144;
 
 // Called when the window is reshaped
-void reshape(int w, int h){
+void reshape(GLFWwindow* window, int w, int h){
     if (!windowDimensions){
         windowDimensions = malloc(sizeof(int) * 2);
     }
@@ -31,7 +31,7 @@ const int* getWindowDims(){
     return windowDimensions;
 }
 
-void display(void){
+void display(GLFWwindow* window){
     // Getting the time we entered into the function
     // struct timespec start;
     // timespec_get(&start, TIME_UTC);
@@ -48,7 +48,7 @@ void display(void){
             // TODO Add another initialization function for world builder
             loadWBProgram();
             break;
-        
+
         case GAME:
             break;
         }
@@ -58,6 +58,15 @@ void display(void){
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Finding if we have the current window dimensions already
+    if (!windowDimensions){
+        // If we don't then get those
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        reshape(window, width, height);
+    }
+
     glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
 
     switch (getMode()) {
@@ -68,7 +77,7 @@ void display(void){
         renderAllObjects(getWBRenderer(), getWorldBuilderProgram(), getWBUniformLoc(WBP_WORLD_T));
         break;
     case GAME:
-        // TODO Throw this in another file that will handle rendering for the game  
+        // TODO Throw this in another file that will handle rendering for the game
         glUseProgram(getMainProgram());
         glBindVertexArray(getVAO(0));
         // TODO Need to bind the world and screen transforms here most likely
@@ -80,7 +89,7 @@ void display(void){
         break;
     }
 
-    glutSwapBuffers();
+    glfwSwapBuffers(window);
     // Find out how long to wait before trying to call for another frame
     // struct timespec end;
     // timespec_get(&end, TIME_UTC);
@@ -88,7 +97,4 @@ void display(void){
     // end.tv_sec = 0;
     // end.tv_nsec = (long)  (1000000000 / maxFramerate) - (end.tv_nsec - start.tv_nsec);
     // nanosleep(&end, &end);
-    
-    // Call for another draw
-    glutPostRedisplay();
 }
