@@ -12,6 +12,7 @@
 #include "renderObjects/rectangle.h"
 #include "renderObjects/renderData.h"
 #include "../../header/parser.h"
+#include "../engine/headers/camera.h"
 
 #define VERT_SHADER_LOC "game/glFunctions/shaderCode/vertexShader.glsl"
 #define FRAG_SHADER_LOC "game/glFunctions/shaderCode/fragShader.glsl"
@@ -20,15 +21,6 @@
 struct ShaderCode{
     const GLchar ** code;
     GLint* codeLength;
-};
-
-// Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
-// Naming convention MP(Main Program), underscores for space and all caps
-enum mainProgramUniforms{
-    MP_TEX0,
-    MP_VIEW_MAT,
-    MP_PROJ_MAT,
-    MP_NUM_UNIFORMS
 };
 
 // All of the uniforms that are in the main program
@@ -51,11 +43,6 @@ static GLuint* textures;
 static GLuint* vaoArray;
 
 //static struct renderData *rect;
-
-// Starting camera attributes
-vec3 startCameraPos = {0, 0, 0};
-vec3 startCameraDirection = {1, 0, 0};
-vec3 cameraUp = {0, 1, 0};
 
 // Loads in the shader code from a file.
 // Returns a pointer to a const char*, both of which should be freed
@@ -177,20 +164,13 @@ GLuint* getUniformLocations(GLuint program, int numUniforms, const char** unifor
     return out;
 }
 
-void setCameraPos(vec3 cameraPos, vec3 cameraDir){
-    glUseProgram(mainProgram);
-    mat4 viewMat;
-    glm_look(cameraPos, cameraDir, cameraUp, viewMat);
-    glUniformMatrix4fv(MP_VIEW_MAT, 1, GL_FALSE, viewMat[0]);
-}
-// Need to make a function to adjust the camera
-
 // Sets up the projection matrix for the graphics calculations
 // Needs to be called on every window update due to it needing the aspect ratio
 void setProjMat(int windowWidth, int windowHeight){
     glUseProgram(mainProgram);
 
     mat4 projMat;
+    // TODO Make sure that this makes sense
     glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
     glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
 }
@@ -277,6 +257,7 @@ void loadMainProgram(){
     // rect = initRect();
     // TODO Free the memory from this at some point
     struct renderObject model;
+    // TODO Make it so that loadModel returns a renderObject struct instead of just the verticies
     model.verticies = loadModel("cube.obj", &model.numVerts);
     model.texCoords = NULL;
     model.normals = NULL;
@@ -289,9 +270,8 @@ void loadMainProgram(){
     bindVAO(&model, vaoArray[0], mainProgram);
     printf("Binded VAO\n");
 
-    setCameraPos(startCameraPos, startCameraDirection);
-
     glUseProgram(mainProgram);
+    initCamera(MP_VIEW_MAT);
 
     // See if I want to keep texture loading here
     glActiveTexture(GL_TEXTURE0);

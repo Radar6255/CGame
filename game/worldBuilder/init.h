@@ -12,7 +12,6 @@ enum worldBuilderProgramUniforms{
     WBP_NUM_UNIFORMS
 };
 
-
 GLuint getWBUniformLoc(int index);
 GLuint getWorldBuilderProgram();
 void* getWBRenderer();

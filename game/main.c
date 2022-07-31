@@ -84,6 +84,7 @@ int main(int argc, char** argv){
     printf("Successfully initialized GLEW.\n");
 
     glfwSetWindowSizeCallback(window, reshape);
+    glfwSetKeyCallback(window, keyboard);
 
     while(!glfwWindowShouldClose(window)){
         display(window);

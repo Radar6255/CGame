@@ -18,12 +18,19 @@ void freeGLResources();
 // Needs to be called on every window update due to it needing the aspect ratio
 void setProjMat(int windowWidth, int windowHeight);
 
-// Sets the camera position
-void setCameraPos(vec3 cameraPos, vec3 cameraDir);
-
 GLuint getVAO(int index);
 
 // Returns the main program if it has been initialized
 GLuint getMainProgram();
 
 GLuint uniformPosition(int index);
+
+// Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
+// Naming convention MP(Main Program), underscores for space and all caps
+enum mainProgramUniforms{
+    MP_TEX0,
+    MP_VIEW_MAT,
+    MP_PROJ_MAT,
+    MP_NUM_UNIFORMS
+};
+
