@@ -1,6 +1,7 @@
 #ifndef RENDER_DATA_HEADER
 #define RENDER_DATA_HEADER
 
+// Defining the number of buffers that we are going to have for each object
 #define RENDER_DATA_BUFFERS 2
 
 struct renderData{

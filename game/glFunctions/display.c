@@ -4,6 +4,7 @@
 #include "../worldBuilder/init.h"
 #include "../engine/headers/render.h"
 #include "../worldBuilder/init.h"
+#include "../engine/headers/camera.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -79,6 +80,7 @@ void display(GLFWwindow* window){
     case GAME:
         // TODO Throw this in another file that will handle rendering for the game
         glUseProgram(getMainProgram());
+        initCamera(MP_VIEW_MAT);
         glBindVertexArray(getVAO(0));
         // TODO Need to bind the world and screen transforms here most likely
         glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);

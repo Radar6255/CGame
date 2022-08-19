@@ -170,8 +170,7 @@ void setProjMat(int windowWidth, int windowHeight){
     glUseProgram(mainProgram);
 
     mat4 projMat;
-    // TODO Make sure that this makes sense
-    glm_perspective(M_PI / 3, windowWidth / windowHeight, 1, 200, projMat);
+    glm_perspective(M_PI / 3, (float) windowWidth / windowHeight, 1, 200, projMat);
     glUniformMatrix4fv(MP_PROJ_MAT, 1, GL_FALSE, projMat[0]);
 }
 
