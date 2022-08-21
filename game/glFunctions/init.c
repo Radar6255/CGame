@@ -44,6 +44,13 @@ static GLuint* vaoArray;
 
 //static struct renderData *rect;
 
+int freeShaderCode(struct ShaderCode sc){
+    free(*(GLchar**) sc.code);
+    free((GLchar**) sc.code);
+    free(sc.codeLength);
+    return 0;
+}
+
 // Loads in the shader code from a file.
 // Returns a pointer to a const char*, both of which should be freed
 struct ShaderCode getShaderCode(char* filename){
@@ -58,18 +65,22 @@ struct ShaderCode getShaderCode(char* filename){
 
     // Creating a char* for the size of this file
     fseek(file, 0L, SEEK_END);
-    int size = ftell(file) + 1;
-    char* contents = (char *) malloc(sizeof(char) * size);
+
+    int* size = malloc(sizeof(int));
+    *size = ftell(file) + 1;
+    char** contentPointer = (char **) malloc(sizeof(char*));
+    *contentPointer = (char *) malloc(sizeof(char) * *size);
+
     fseek(file, 0L, SEEK_SET);
 
-    for(int i = 0; i < size; i++){
-        contents[i] = getc(file);
+    for(int i = 0; i < *size; i++){
+        (*contentPointer)[i] = getc(file);
     }
-    contents[size-1] = 0;
+    (*contentPointer)[*size-1] = 0;
 
     struct ShaderCode out;
-    out.code = (const GLchar**) &contents;
-    out.codeLength = &size;
+    out.code = (const GLchar**) contentPointer;
+    out.codeLength = size;
 
     fclose(file);
     return out;
@@ -83,6 +94,9 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, GLenum shade
         printf("OpenGL failed to create a shader to use.\n");
         exit(12);
     }
+    /* printf("Shader length: %d\n", *shaderLength); */
+    /* printf("First line: %s\n", shaderCode[0]); */
+
     glShaderSource(out, 1, shaderCode, shaderLength);
     glCompileShader(out);
 
@@ -91,6 +105,7 @@ GLuint createShader(const GLchar** shaderCode, GLint* shaderLength, GLenum shade
     printf("Shader compile status: %s\n", compileStatus == GL_TRUE ? "Success" : "Failed");
 
     if(compileStatus != GL_TRUE) {
+        printf("ERROR: Compiliation failed diagnostics below\n\n");
         GLsizei maxLength;
         glGetShaderiv(out, GL_INFO_LOG_LENGTH, &maxLength);
 
@@ -111,17 +126,17 @@ GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShade
     printf("\nLoading vertex shader...\n");
     struct ShaderCode source = getShaderCode(vertShaderLoc);
     GLuint vertShader = createShader(source.code, source.codeLength, GL_VERTEX_SHADER);
-    free(*(GLchar**) source.code);
+    freeShaderCode(source);
 
     printf("\nLoading geometry shader...\n");
     source = getShaderCode(geometryShaderLoc);
     GLuint geoShader = createShader(source.code, source.codeLength, GL_GEOMETRY_SHADER);
-    free(*(GLchar**) source.code);
+    freeShaderCode(source);
 
     printf("\nLoading fragment shader...\n");
     source = getShaderCode(fragShaderLoc);
     GLuint fragShader = createShader(source.code, source.codeLength, GL_FRAGMENT_SHADER);
-    free(*(GLchar**) source.code);
+    freeShaderCode(source);
 
     glAttachShader(program, vertShader);
     glAttachShader(program, geoShader);
