@@ -43,6 +43,8 @@ static GLuint* textures;
 // Array of openGL VAO's
 static GLuint* vaoArray;
 
+long numIndicies;
+
 //static struct renderData *rect;
 
 int freeShaderCode(struct ShaderCode sc){
@@ -231,44 +233,44 @@ void bindVAO(struct renderObject* data, GLuint vao, GLuint program){
 
     // Loading the data into the buffer
     glNamedBufferData(buffers[0], data->numVerts * 3 * sizeof(float), data->verticies, GL_STATIC_DRAW);
-    
+
     // Bind the buffer to the VAO to use as verticies
     // The sizeof(float) * 3 may change if I decide to use a triangle strip instead of individual triangles
     glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(float) * 3);
     glVertexArrayAttribBinding(vao, 0, 0);
-    
+
     // Telling OpenGL the format of our buffer
     glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayBindingDivisor(vao, 0, 0);
-    
+
     // Enabling the vertex attribute in the vertex shader
     glEnableVertexArrayAttrib(vao, 0);
-    
+
     // Loading the indicies into a buffer
     glNamedBufferData(buffers[2], data->numTris * 3 * sizeof(unsigned int), data->indicies, GL_STATIC_DRAW);
     //glVertexArrayVertexBuffer(vao, 2, buffers[2], 0, sizeof(unsigned int));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
-    
+
     //glVertexArrayElementBuffer(vao, 2);
     //glVertexArrayAttribBinding(vao, 2, 2);
-    
+
     //glVertexArrayAttribFormat(vao, 2, 1, GL_UNSIGNED_INT, GL_FALSE, 0);
     //glVertexArrayBindingDivisor(vao, 2, 0);
-    
+
     //glVertexArrayElementBuffer(GL_ELEMENT_ARRAY_BUFFER);
-    
+
     if (data->texCoords){
         // Loading the texture coords into a buffer
         glNamedBufferData(buffers[1], data->numVerts * sizeof(float) * 2, data->texCoords, GL_STATIC_DRAW);
-    
+
         // Bind the buffer to the VAO to use as texture coords
         glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
         glVertexArrayAttribBinding(vao, 1, 1);
-    
+
         // Telling OpenGL the format of our buffer
         glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayBindingDivisor(vao, 1, 0);
-    
+
         // Enabling the texture attribute in the vertex shader
         glEnableVertexArrayAttrib(vao, 1);
     }
@@ -328,7 +330,8 @@ void loadMainProgram(){
     // rect = initRect();
     // TODO Free the memory from this at some point
     struct renderObject model;
-    Model modelLoad = loadModel("cube.obj");
+    /* Model modelLoad = loadModel("cube.obj"); */
+    Model modelLoad = loadModel("car.obj");
 
     // TODO Make it so that loadModel returns a renderObject struct instead of just the verticies
     model.verticies = modelLoad.verts;
@@ -337,6 +340,10 @@ void loadMainProgram(){
     model.indicies = modelLoad.indicies;
     model.numVerts = modelLoad.numVerts;
     model.numTris = modelLoad.numTris;
+
+    numIndicies = modelLoad.numTris * 3;
+
+    printf("Num verts: %ld, num tris: %ld\n", model.numVerts, model.numTris);
 
     /* float* verticies = malloc(sizeof(float) * 9); */
     /* verticies[0] = 0.0; */
@@ -368,6 +375,10 @@ void loadMainProgram(){
     //glActiveTexture(GL_TEXTURE0);
     //glBindTexture(GL_TEXTURE_2D, textures[MONO1]);
     // glUniform1i(mainProgramUniforms[MP_TEX0], 0);
+}
+
+long getNumIndicies() {
+    return numIndicies;
 }
 
 

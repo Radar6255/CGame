@@ -22,6 +22,8 @@ void setProjMat(int windowWidth, int windowHeight);
 
 GLuint getVAO(int index);
 
+long getNumIndicies();
+
 // Returns the main program if it has been initialized
 GLuint getMainProgram();
 

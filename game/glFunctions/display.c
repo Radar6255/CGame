@@ -96,7 +96,7 @@ void display(GLFWwindow* window){
 
         /* glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT); */
         // TODO Need to figure out how to get this working
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
+        glDrawElements(GL_TRIANGLES, getNumIndicies(), GL_UNSIGNED_INT, (void*) 0);
         break;
     default:
         printf("Please specify a valid mode or add a display function to display.c\n");
