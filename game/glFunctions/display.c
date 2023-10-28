@@ -94,9 +94,9 @@ void display(GLFWwindow* window){
         // Currently we are setting the uniform for the camera constantly I guess...
         // Still need to do something about the screen transform
 
-        glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
+        /* glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT); */
         // TODO Need to figure out how to get this working
-        /* glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0); */
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0);
         break;
     default:
         printf("Please specify a valid mode or add a display function to display.c\n");

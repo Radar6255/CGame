@@ -210,59 +210,65 @@ void bindVAO(struct renderObject* data, GLuint vao, GLuint program){
     GLuint *buffers = (GLuint *) malloc(sizeof(GLuint *) * RENDER_DATA_BUFFERS);
     glCreateBuffers(RENDER_DATA_BUFFERS, buffers);
 
-    printf("Have %ld verts\n", data->numVerts);
-    for (int i = 0; i < data->numVerts; i++) {
-        printf("%f, ", data->verticies[i]);
-        printf("\n");
-    }
+#ifdef T
+    glGenBuffers(RENDER_DATA_BUFFERS, buffers);
 
-    printf("Have %ld tris\n", data->numTris);
-    for (int i = 0; i < data->numTris * 3; i++) {
-        printf("%d, ", data->indicies[i]);
-        printf("\n");
-    }
+    // Dealing with verticies
+    glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+
+    glBufferData(GL_ARRAY_BUFFER, data->numVerts * 3 * sizeof(float), data->verticies, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    // Dealing with indicies
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data->numTris * 3 * sizeof(unsigned int), data->indicies, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(1);
+#endif
 
     // Loading the data into the buffer
-    glNamedBufferData(buffers[0], data->numVerts * sizeof(float), data->verticies, GL_STATIC_DRAW);
-
+    glNamedBufferData(buffers[0], data->numVerts * 3 * sizeof(float), data->verticies, GL_STATIC_DRAW);
+    
     // Bind the buffer to the VAO to use as verticies
     // The sizeof(float) * 3 may change if I decide to use a triangle strip instead of individual triangles
-    /* glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(float)); */
     glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(float) * 3);
     glVertexArrayAttribBinding(vao, 0, 0);
-
+    
     // Telling OpenGL the format of our buffer
     glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayBindingDivisor(vao, 0, 0);
-
+    
     // Enabling the vertex attribute in the vertex shader
     glEnableVertexArrayAttrib(vao, 0);
-
+    
     // Loading the indicies into a buffer
     glNamedBufferData(buffers[2], data->numTris * 3 * sizeof(unsigned int), data->indicies, GL_STATIC_DRAW);
-    glVertexArrayVertexBuffer(vao, 2, buffers[2], 0, sizeof(unsigned int));
+    //glVertexArrayVertexBuffer(vao, 2, buffers[2], 0, sizeof(unsigned int));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[2]);
-
-    glVertexArrayElementBuffer(vao, 2);
-    /* glVertexArrayAttribBinding(vao, 2, 2); */
-
-    glVertexArrayAttribFormat(vao, 2, 1, GL_UNSIGNED_INT, GL_FALSE, 0);
-    glVertexArrayBindingDivisor(vao, 2, 0);
-
-    /* glVertexArrayElementBuffer(GL_ELEMENT_ARRAY_BUFFER); */
-
+    
+    //glVertexArrayElementBuffer(vao, 2);
+    //glVertexArrayAttribBinding(vao, 2, 2);
+    
+    //glVertexArrayAttribFormat(vao, 2, 1, GL_UNSIGNED_INT, GL_FALSE, 0);
+    //glVertexArrayBindingDivisor(vao, 2, 0);
+    
+    //glVertexArrayElementBuffer(GL_ELEMENT_ARRAY_BUFFER);
+    
     if (data->texCoords){
         // Loading the texture coords into a buffer
         glNamedBufferData(buffers[1], data->numVerts * sizeof(float) * 2, data->texCoords, GL_STATIC_DRAW);
-
+    
         // Bind the buffer to the VAO to use as texture coords
         glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(float) * 2);
         glVertexArrayAttribBinding(vao, 1, 1);
-
+    
         // Telling OpenGL the format of our buffer
         glVertexArrayAttribFormat(vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
         glVertexArrayBindingDivisor(vao, 1, 0);
-
+    
         // Enabling the texture attribute in the vertex shader
         glEnableVertexArrayAttrib(vao, 1);
     }
