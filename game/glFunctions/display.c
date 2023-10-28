@@ -25,6 +25,7 @@ void reshape(GLFWwindow* window, int w, int h){
     windowDimensions[1] = h;
     glViewport(0, 0, w, h);
 
+    printf("Should be setting up the projection matrix\n");
     setProjMat(w, h);
 }
 
@@ -51,6 +52,7 @@ void display(GLFWwindow* window){
             break;
 
         case GAME:
+            loadMainProgram();
             break;
         }
         init = 1;
@@ -68,7 +70,7 @@ void display(GLFWwindow* window){
         reshape(window, width, height);
     }
 
-    glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
+    //glViewport(0, 0, windowDimensions[0], windowDimensions[1]);
 
     switch (getMode()) {
     case WBUILDER:
@@ -80,10 +82,21 @@ void display(GLFWwindow* window){
     case GAME:
         // TODO Throw this in another file that will handle rendering for the game
         glUseProgram(getMainProgram());
-        initCamera(MP_VIEW_MAT);
+
+        // This binds the camera transform
+        initCamera(uniformPosition(MP_VIEW_MAT));
+
+        // Here we are binding our VAO for the first object for now
         glBindVertexArray(getVAO(0));
+
         // TODO Need to bind the world and screen transforms here most likely
+        // Not sure how I am going to do this exactly...
+        // Currently we are setting the uniform for the camera constantly I guess...
+        // Still need to do something about the screen transform
+
         glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
+        // TODO Need to figure out how to get this working
+        /* glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*) 0); */
         break;
     default:
         printf("Please specify a valid mode or add a display function to display.c\n");

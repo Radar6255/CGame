@@ -1,3 +1,6 @@
+#define DEBUG
+#define CGLM_DEFINE_PRINTS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +33,6 @@ enum RunningModes getMode(){
 int main(int argc, char** argv){
 
     if (argc > 1){
-        // TODO Possibly move this into another function if I need to do a lot of specific things for the world builder
         if (!strcmp(argv[1], "wbuilder")){
             printf("Starting world builder...\n");
             mode = WBUILDER;

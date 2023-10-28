@@ -2,7 +2,7 @@
 #define RENDER_DATA_HEADER
 
 // Defining the number of buffers that we are going to have for each object
-#define RENDER_DATA_BUFFERS 2
+#define RENDER_DATA_BUFFERS 3
 
 struct renderData{
     float points[6][3];
@@ -13,7 +13,10 @@ struct renderObject{
     float* verticies;
     float* normals;
     float* texCoords;
-    unsigned int numVerts;
+    unsigned int* indicies;
+
+    long numVerts;
+    long numTris;
 };
 
 #endif

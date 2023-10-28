@@ -1,45 +1,94 @@
 #include "../worldBuilder/worldBuilder.h"
 #include "../main.h"
 #include "../engine/headers/camera.h"
+#include "./headers/keyboard.h"
 
 #include <cglm/cglm.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+bool left = false;
+bool right = false;
+bool up = false;
+bool down = false;
+bool forward = false;
+bool back = false;
 
 void gameKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods){
-    vec3 left = {0, 0, -0.1};
-    vec3 right = {0, 0, 0.1};
-    vec3 up = {0, 0.1, 0};
-    vec3 down = {0, -0.1, 0};
-    vec3 forward = {0.1, 0, 0};
-    vec3 back = {-0.1, 0, 0};
-
-    vec3 out = {0, 0, 0};
-
     switch(action){
         case GLFW_PRESS:
             switch(key){
                 case GLFW_KEY_A:
-                    glm_vec3_add(left, out, out);
+                    left = true;
                     break;
                 case GLFW_KEY_D:
-                    glm_vec3_add(right, out, out);
+                    right = true;
                     break;
                 case GLFW_KEY_S:
-                    glm_vec3_add(back, out, out);
+                    back = true;
                     break;
                 case GLFW_KEY_W:
-                    glm_vec3_add(forward, out, out);
+                    forward = true;
                     break;
                 case GLFW_KEY_SPACE:
-                    glm_vec3_add(up, out, out);
+                    up = true;
                     break;
                 case GLFW_KEY_C:
-                    glm_vec3_add(down, out, out);
+                    down = true;
+                    break;
+            }
+            break;
+        case GLFW_RELEASE:
+            switch(key){
+                case GLFW_KEY_A:
+                    left = false;
+                    break;
+                case GLFW_KEY_D:
+                    right = false;
+                    break;
+                case GLFW_KEY_S:
+                    back = false;
+                    break;
+                case GLFW_KEY_W:
+                    forward = false;
+                    break;
+                case GLFW_KEY_SPACE:
+                    up = false;
+                    break;
+                case GLFW_KEY_C:
+                    down = false;
                     break;
             }
             break;
     }
+    performMovementUpdate();
+}
+
+void performMovementUpdate(){
+    vec3 leftM = {0, 0, -0.1};
+    vec3 rightM = {0, 0, 0.1};
+    vec3 upM = {0, 0.1, 0};
+    vec3 downM = {0, -0.1, 0};
+    vec3 forwardM = {0.1, 0, 0};
+    vec3 backM = {-0.1, 0, 0};
+
+    vec3 out = {0, 0, 0};
+
+    if (left){
+        glm_vec3_add(leftM, out, out);
+    } if (right){
+        glm_vec3_add(rightM, out, out);
+    } if (back){
+        glm_vec3_add(backM, out, out);
+    } if (forward){
+        glm_vec3_add(forwardM, out, out);
+    } if (up){
+        glm_vec3_add(upM, out, out);
+    } if (down){
+        glm_vec3_add(downM, out, out);
+    }
+
     moveCamera(out);
 }
 

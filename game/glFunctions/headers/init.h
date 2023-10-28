@@ -8,6 +8,8 @@ void initGL();
 
 GLuint initProgram(char* vertShaderLoc, char* geometryShaderLoc, char* fragShaderLoc);
 
+void loadMainProgram();
+
 GLuint* getUniformLocations(GLuint program, int numUniforms, const char** uniformNames);
 
 void bindVAO(struct renderObject* data, GLuint vao, GLuint program);
@@ -28,7 +30,6 @@ GLuint uniformPosition(int index);
 // Holds the location of the uniform locations in MAIN_PROGRAM_UNIFORMS.
 // Naming convention MP(Main Program), underscores for space and all caps
 enum mainProgramUniforms{
-    MP_TEX0,
     MP_VIEW_MAT,
     MP_PROJ_MAT,
     MP_NUM_UNIFORMS
