@@ -2,7 +2,6 @@
 #include <stdint.h>
 
 #include <GL/glew.h>
-#include <GL/glut.h>
 
 #define CGLM_DEFINE_PRINTS
 #include <cglm/cglm.h>
@@ -10,7 +9,6 @@
 #include "../errors.h"
 #include "headers/hashMap.h"
 #include "headers/render.h"
-
 
 // Struct to contain an object
 typedef struct {
@@ -21,6 +19,7 @@ typedef struct {
 
 typedef struct {
     GLuint screenTransUni;
+    GLuint cameraPosUni;
 } RenderArguments;
 
 // Initailize everything. Store everything in either an array or a hash set
@@ -75,7 +74,9 @@ static void renderFunc(void* renderObject, void* renderArgs){
     RenderObject* renderObjectS = renderObject;
 
     glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
+//    glUniformMatrix3fv(RenderArgumentsS->screenTransUni, 1, GL_FALSE, renderObjectS->screenT[0]);
 
+    // TODO Change this at some point to use indicies
     glBindVertexArray(renderObjectS->vaoIndex);
     glDrawArrays(GL_TRIANGLES, 0, GL_UNSIGNED_SHORT);
 }

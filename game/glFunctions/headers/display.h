@@ -1,3 +1,5 @@
-void reshape(int w, int h);
-void display(void);
+#include <GLFW/glfw3.h>
+
+void reshape(GLFWwindow* window, int w, int h);
+void display(GLFWwindow* window);
 const int* getWindowDims();
