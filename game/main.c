@@ -10,7 +10,7 @@
 
 #include "glFunctions/headers/display.h"
 #include "glFunctions/headers/keyboard.h"
-#include "glFunctions/headers/mouse.h"
+#include "engine/headers/mouse.h"
 #include "glFunctions/headers/init.h"
 
 enum RunningModes{
@@ -19,7 +19,7 @@ enum RunningModes{
 };
 
 void printErr(char* errMsg){
-    fprintf(stderr, errMsg);
+    fprintf(stderr, "%s", errMsg);
     getchar();
 }
 
@@ -31,7 +31,6 @@ enum RunningModes getMode(){
 }
 
 int main(int argc, char** argv){
-
     if (argc > 1){
         if (!strcmp(argv[1], "wbuilder")){
             printf("Starting world builder...\n");
@@ -85,8 +84,19 @@ int main(int argc, char** argv){
     }
     printf("Successfully initialized GLEW.\n");
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Seeing if we can get some better input where we ignore acceleration
+    if (glfwRawMouseMotionSupported()) {
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
+
     glfwSetWindowSizeCallback(window, reshape);
     glfwSetKeyCallback(window, keyboard);
+
+    // Catching any updates to cursor position
+    glfwSetCursorPosCallback(window, mouseMoveE);
+    glfwSetMouseButtonCallback(window, mouseClickE);
 
     while(!glfwWindowShouldClose(window)){
         display(window);

@@ -20,9 +20,9 @@ vec3 cameraUp = {0, 1, 0};
 void setCameraPos(vec3 cameraPos, vec3 cameraDir, int cameraUniformPos){
     mat4 viewMat;
     /* glm_mat4_print(viewMat, stdout); */
-    /* glm_look(cameraPos, cameraDir, cameraUp, viewMat); */
+    glm_look(cameraPos, cameraDir, cameraUp, viewMat);
     vec3 origin = {0, 0, 0};
-    glm_lookat(cameraPos, origin, cameraUp, viewMat);
+    /* glm_lookat(cameraPos, origin, cameraUp, viewMat); */
 
     /* printf("Printing viewMat...\n"); */
     /* printf("%f, %f, %f, %f\n", viewMat[0][0], viewMat[0][1], viewMat[0][2], viewMat[0][3]); */
@@ -35,6 +35,12 @@ void setCameraPos(vec3 cameraPos, vec3 cameraDir, int cameraUniformPos){
 
 void initCamera(int cameraUniformPos){
     setCameraPos(currentCameraPos, currentCameraDirection, cameraUniformPos);
+}
+
+void setCameraRotation(float xRot, float yRot) {
+    currentCameraDirection[0] = sin(xRot);
+    currentCameraDirection[1] = sin(yRot);
+    currentCameraDirection[2] = cos(xRot) * cos(yRot);
 }
 
 // The direction here is specified with the first element being the 
@@ -64,3 +70,5 @@ void moveCamera(vec3 dir){
     glm_vec3_print(currentCameraPos, stderr);
     printf("%f, %f, %f\n", currentCameraPos[0], currentCameraPos[1], currentCameraPos[2]);
 }
+
+
